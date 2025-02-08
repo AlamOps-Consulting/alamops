@@ -174,4 +174,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   `;
   document.head.appendChild(style);
+
+  // Add hover effect for news cards
+  document.querySelectorAll('.news-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      card.style.transform = 'translateY(-5px)';
+      card.style.transition = 'transform 0.3s ease';
+    });
+  
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'translateY(0)';
+    });
+  });
 });
