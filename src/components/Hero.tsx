@@ -9,7 +9,7 @@ const Hero: React.FC = () => {
       <div className="hero-content">
         <h1>Expertos en Multi-Cloud</h1>
         <p>Potenciamos su transformación digital con soluciones en AWS, Azure y Google Cloud.</p>        
-        <a href="https://calendly.com/ceo-alamops" target="_blank" class="cta-button"> Consulta Gratuita </a>
+        <a href="https://calendly.com/ceo-alamops" target="_blank" className="cta-button"> Consulta Gratuita </a>
       </div>
       <Carousel />
     </section>
