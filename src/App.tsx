@@ -1,35 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import ContactForm from "./components/ContactForm"; // Importamos el formulario de contacto
+import "./styles.css"; // Asegúrate de que tus estilos sigan funcionando
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <header>
+        <nav>
+          <div className="logo">
+            <img src="/public/Alamops.png" alt="AlamOps Logo" width="50" />
+            <h1>AlamOps - Expertos en Cloud Computing</h1>
+          </div>
+          <ul className="nav-links">
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#nosotros">Nosotros</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main>
+        <section id="inicio">
+          <h1>Expertos en Multi-Cloud</h1>
+          <p>Potenciamos su transformación digital con soluciones en AWS, Azure y Google Cloud.</p>
+          <a href="https://calendly.com/ceo-alamops" target="_blank" rel="noopener noreferrer">
+            Consulta Gratuita
+          </a>
+        </section>
+
+        {/* Sección de Contacto */}
+        <ContactForm />
+      </main>
+
+      <footer>
+        <p>&copy; 2024 AlamOps. Todos los derechos reservados.</p>
+      </footer>
+    </div>
+  );
 }
 
-export default App
+export default App;
