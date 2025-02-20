@@ -634,3 +634,9 @@ pre {
     max-width: 400px;
   }
 }
+
+.feature svg {
+  color: #ff9900;
+  margin-bottom: 1rem;
+}
+
