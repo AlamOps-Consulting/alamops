@@ -1,32 +1,38 @@
-FROM node:20.18-alpine3.21 AS build
-ENV TZ=Europe/Madrid
-ENV COMPOSE_HTTP_TIMEOUT=200
+# ---------- base ----------
+ARG NODE_VERSION=20-alpine
+
+# ---------- deps ----------
+FROM node:${NODE_VERSION} AS deps
 WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache libc6-compat
+COPY package*.json ./
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
+# ---------- build ----------
+FROM node:${NODE_VERSION} AS builder
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN apk add --no-cache libc6-compat
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Instalar Rollup globalmente (si realmente es necesario)
-RUN npm install -g rollup  
+RUN npm run build
+RUN npm prune --omit=dev
 
-# Instalar dependencias con compatibilidad para peer dependencies
-RUN npm install --legacy-peer-deps  
+# ---------- run ----------
+FROM node:${NODE_VERSION} AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+RUN apk add --no-cache libc6-compat
 
+# Copiamos SOLO lo necesario para ejecutar
+COPY --from=builder /app/package*.json ./
+# ¡No copies next.config.ts aquí!
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
 
-# Construir la aplicación
-
-RUN ["npm", "run", "build"]
-
-
-# Usar una imagen ligera de Nginx para servir la aplicación
-FROM nginx:alpine
-
-# Copiar el build de React a la carpeta de Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Copiar la configuración de Nginx personalizada (si es necesario)
- COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Exponer el puerto 80
-EXPOSE 80
-
-# Iniciar Nginx
-CMD ["nginx", "-g", "daemon off;"]
+EXPOSE 3000
+CMD ["npm", "start"]

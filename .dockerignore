@@ -1,3 +1,7 @@
+.git
 node_modules
-package-lock.json
-
+.next/cache
+dist
+.vscode
+.DS_Store
+npm-debug.log*
