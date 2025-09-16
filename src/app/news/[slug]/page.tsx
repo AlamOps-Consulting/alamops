@@ -16,7 +16,7 @@ import { notFound } from "next/navigation";
 const newsData = {
 	"aws-advanced-consulting-partner": {
 		title: "AWS Advanced Consulting Partner Certification Achieved",
-		date: "March 15, 2024",
+		date: "March 15, 2025",
 		category: "Certifications",
 		icon: Award,
 		readTime: "3 min read",
@@ -43,7 +43,7 @@ const newsData = {
 	},
 	"finops-platform-launch": {
 		title: "Launch of Our Revolutionary FinOps Platform",
-		date: "March 8, 2024",
+		date: "March 8, 2025",
 		category: "Products",
 		icon: Rocket,
 		readTime: "5 min read",
@@ -75,7 +75,7 @@ const newsData = {
 	},
 	"international-expansion": {
 		title: "International Market Expansion",
-		date: "March 1, 2024",
+		date: "March 1, 2025",
 		category: "Expansion",
 		icon: Globe,
 		readTime: "4 min read",
