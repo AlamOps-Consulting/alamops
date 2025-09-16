@@ -16,6 +16,7 @@ import {
 	PlayCircle,
 	Volume2,
 	VolumeX,
+  Linkedin,
 } from "lucide-react";
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
@@ -26,6 +27,11 @@ import visualizerImg from "@/assets/features/visualizer.png";
 import securityImg from "@/assets/features/security.jpg";
 import analyticsImg from "@/assets/features/analitycs.png";
 import internalAuditImg from "@/assets/features/internal-audit.jpg";
+import KrimdaPic from "@/assets/testimonials/krimda.png"
+import QaBitPic from "@/assets/testimonials/qa-bit.jpeg"
+import SoaintPic from "@/assets/testimonials/soaint.jpeg"
+
+
 
 
 
@@ -47,7 +53,6 @@ interface PricingPlan {
 }
 const productFeatures: ProductFeature[] = [
 	{
-		// antes: icon: Zap,
 		imageSrc: aiGeneratedImg,
 		imageAlt: "AI generated Terraform code on screen",
 		title: "AI-generated Terraform",
@@ -91,55 +96,6 @@ const productFeatures: ProductFeature[] = [
 	},
 ];
 
-
-const pricingPlans: PricingPlan[] = [
-	{
-		name: "Starter",
-		price: "$29",
-		period: "/month",
-		description: "Perfect for small teams and startups",
-		features: [
-			"Up to 5 team members",
-			"10GB storage",
-			"Basic analytics",
-			"Email support",
-			"Mobile apps",
-		],
-		ctaText: "Start Free Trial",
-	},
-	{
-		name: "Professional",
-		price: "$99",
-		period: "/month",
-		description: "Ideal for growing businesses",
-		features: [
-			"Up to 25 team members",
-			"100GB storage",
-			"Advanced analytics",
-			"Priority support",
-			"Custom integrations",
-			"Advanced security",
-		],
-		popular: true,
-		ctaText: "Get Started",
-	},
-	{
-		name: "Enterprise",
-		price: "Custom",
-		period: "",
-		description: "For large organizations",
-		features: [
-			"Unlimited team members",
-			"Unlimited storage",
-			"Custom analytics",
-			"24/7 phone support",
-			"White-label solution",
-			"Dedicated manager",
-		],
-		ctaText: "Contact Sales",
-	},
-];
-
 const testimonials = [
 	{
 		name: "Víctor Suárez",
@@ -147,6 +103,9 @@ const testimonials = [
 		content:
 			"This product transformed our workflow completely. The ROI was evident within the first month.",
 		rating: 5,
+    picture: QaBitPic,
+		linkedin_profile:
+			"https://www.linkedin.com/company/qa-bit/posts/?feedView=all",
 	},
 	{
 		name: "Santiago Carrasco",
@@ -154,6 +113,9 @@ const testimonials = [
 		content:
 			"The best investment we've made for our team's productivity. Highly recommend!",
 		rating: 5,
+    picture: KrimdaPic,
+		linkedin_profile:
+			"https://www.linkedin.com/company/krimda3/posts/?feedView=all",
 	},
 	{
 		name: "Lucas Valenzuela Murillo",
@@ -161,6 +123,9 @@ const testimonials = [
 		content:
 			"The product is incredible, and the time saved in taking an idea to deployment in the cloud is impressive.",
 		rating: 5,
+    picture: SoaintPic,
+		linkedin_profile:
+			"https://www.linkedin.com/company/soaint/posts/?feedView=all",
 	},
 ];
 
@@ -415,13 +380,50 @@ export function ProductSection() {
 						</p>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 						{testimonials.map((testimonial, index) => (
 							<Card
 								key={index}
-								className="border-0 bg-card/80 backdrop-blur-sm"
+								className="border-0 bg-card/80 backdrop-blur-sm hover:shadow-lg transition-shadow duration-300"
 							>
 								<CardContent className="pt-6">
+									{/* Header with photo and info */}
+									<div className="flex items-start gap-4 mb-4">
+										{/* Profile Photo */}
+										<div className="flex-shrink-0">
+											<Image
+												src={testimonial.picture}
+												alt={`${testimonial.name} profile`}
+												width={60}
+												height={60}
+												className="rounded-full object-cover ring-2 ring-primary/10"
+											/>
+										</div>
+
+										{/* Name, role, and social links */}
+										<div className="min-w-0 flex-1">
+											<div className="font-semibold text-lg mb-1">
+												{testimonial.name}
+											</div>
+											<div className="text-sm text-muted-foreground mb-3">
+												{testimonial.role}
+											</div>
+
+											{/* Social Links */}
+											<div className="flex items-center gap-3">
+												<Link
+													href={testimonial.linkedin_profile}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-muted-foreground hover:text-blue-600 transition-colors"
+												>
+													<Linkedin className="w-4 h-4" />
+												</Link>
+											</div>
+										</div>
+									</div>
+
+									{/* Rating */}
 									<div className="flex mb-4">
 										{Array.from({ length: testimonial.rating }).map((_, i) => (
 											<Star
@@ -430,15 +432,11 @@ export function ProductSection() {
 											/>
 										))}
 									</div>
-									<blockquote className="text-lg mb-4">
+
+									{/* Testimonial content */}
+									<blockquote className="text-base italic leading-relaxed">
 										"{testimonial.content}"
 									</blockquote>
-									<footer>
-										<div className="font-semibold">{testimonial.name}</div>
-										<div className="text-sm text-muted-foreground">
-											{testimonial.role}
-										</div>
-									</footer>
 								</CardContent>
 							</Card>
 						))}
@@ -461,7 +459,7 @@ export function ProductSection() {
 								<ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
 							</Button>
 						</Link>
-                        <Link
+						<Link
 							href="https://calendly.com/ceo-alamops"
 							target="_blank"
 							rel="noopener noreferrer"

@@ -140,9 +140,6 @@ export function Footer() {
 					<p className="text-background/70 text-sm">
 						© {new Date().getFullYear()} AlamOps. All rights reserved.
 					</p>
-					<p className="text-background/70 text-sm">
-						Made with ❤️
-					</p>
 				</div>
 			</div>
 		</footer>
