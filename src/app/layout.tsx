@@ -85,7 +85,7 @@ export default function RootLayout({
 				<link
 					rel="preconnect"
 					href="https://fonts.gstatic.com"
-					crossOrigin="true"
+					crossOrigin="anonymous"
 				/>
 				{/* Example: preload a critical font (adjust path/name) */}
 				{/* <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /> */}

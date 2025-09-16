@@ -142,17 +142,24 @@ const pricingPlans: PricingPlan[] = [
 
 const testimonials = [
 	{
-		name: "Sarah Johnson",
-		role: "CTO, TechCorp",
+		name: "Víctor Suárez",
+		role: "CEO, QA BIT",
 		content:
 			"This product transformed our workflow completely. The ROI was evident within the first month.",
 		rating: 5,
 	},
 	{
-		name: "Michael Chen",
-		role: "Product Manager, InnovateCo",
+		name: "Santiago Carrasco",
+		role: "SBM, Krimda",
 		content:
 			"The best investment we've made for our team's productivity. Highly recommend!",
+		rating: 5,
+	},
+	{
+		name: "Lucas Valenzuela Murillo",
+		role: "COO, SOAINT",
+		content:
+			"The product is incredible, and the time saved in taking an idea to deployment in the cloud is impressive.",
 		rating: 5,
 	},
 ];
