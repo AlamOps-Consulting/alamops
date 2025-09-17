@@ -11,6 +11,7 @@ import { Calendar, ArrowRight} from "lucide-react";
 import Link from "next/link";
 import IconRenderer from "@/lib/icon-render";
 import { API_URL } from "@/lib/utils";
+import type { NewsItem, NewsList } from "@/types/news.type";
 
 
 export default async function NewsSection() {
@@ -20,7 +21,7 @@ export default async function NewsSection() {
 
   if (!res.ok) {
     // fallback: retornar UI con mensaje o data vacía
-    const fallback = [];
+    const fallback: [] = [];
     return <NewsGrid news={fallback} />;
   }
 
@@ -29,7 +30,7 @@ export default async function NewsSection() {
   return <NewsGrid news={articles.items} />;
 }
 
-function NewsGrid({ news }) {
+function NewsGrid({ news }: { news: NewsItem[] }) {
 	return (
 		<section id="news" className="py-20 lg:py-32 bg-muted/30">
 			<div className="container mx-auto px-4">

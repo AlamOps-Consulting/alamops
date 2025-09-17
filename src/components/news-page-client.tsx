@@ -8,8 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import IconRenderer from "@/lib/icon-render";
 import { Badge } from "./ui/badge";
 import Link from "next/link";
+import type { NewsItem } from "@/types/news.type";
 
-export default function NewsPageClient({ initialArticles }) {
+
+export default function NewsPageClient({ initialArticles }: { initialArticles: NewsItem[] }) {
 	const [articles, setArticles] = useState(initialArticles || []);
 	const [category, setCategory] = useState("All");
 	const [query, setQuery] = useState("");
@@ -118,7 +120,7 @@ export default function NewsPageClient({ initialArticles }) {
 						{filtered
 							.filter((a) => a.featured)
 							.map((article, index) => {
-                const formatted = new Date(article.date).toLocaleDateString(
+								const formatted = new Date(article.date).toLocaleDateString(
 									"en-US",
 									{
 										month: "long",
@@ -126,7 +128,7 @@ export default function NewsPageClient({ initialArticles }) {
 										year: "numeric",
 									}
 								);
-                
+
 								return (
 									<Link key={index} href={`/news/${article.slug}`}>
 										<Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-background/80 backdrop-blur-sm h-full">
@@ -188,14 +190,14 @@ export default function NewsPageClient({ initialArticles }) {
 					<h2 className="text-2xl font-bold mb-8">All Articles</h2>
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 						{filtered.map((article, index) => {
-               const formatted = new Date(article.date).toLocaleDateString(
-									"en-US",
-									{
-										month: "long",
-										day: "numeric",
-										year: "numeric",
-									}
-								);
+							const formatted = new Date(article.date).toLocaleDateString(
+								"en-US",
+								{
+									month: "long",
+									day: "numeric",
+									year: "numeric",
+								}
+							);
 							return (
 								<Link key={index} href={`/news/${article.slug}`}>
 									<Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border-0 bg-background/60 backdrop-blur-sm">
