@@ -13,6 +13,7 @@ RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 FROM node:${NODE_VERSION} AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_PUBLIC_API_URL="https://api.alamops.com"
 RUN apk add --no-cache libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
