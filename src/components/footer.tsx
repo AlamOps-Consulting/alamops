@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Cloud, Github, Linkedin, Twitter } from "lucide-react";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export function Footer() {
 	return (
@@ -27,30 +28,38 @@ export function Footer() {
 							<span className="text-xl font-bold">Alamops</span>
 						</div>
 						<p className="text-background/70 leading-relaxed">
-							Transforming companies through innovative and secure multi-cloud solutions.
+							Transforming companies through innovative and secure multi-cloud
+							solutions.
 						</p>
 						<div className="flex gap-3">
-							<Button
-								size="icon"
-								variant="ghost"
-								className="text-background/70 hover:text-background hover:bg-background/10"
-							>
-								<Twitter className="w-5 h-5" />
-							</Button>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="text-background/70 hover:text-background hover:bg-background/10"
-							>
-								<Linkedin className="w-5 h-5" />
-							</Button>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="text-background/70 hover:text-background hover:bg-background/10"
-							>
-								<Github className="w-5 h-5" />
-							</Button>
+							{/* <Link href="https://twitter.com/alamops" passHref>
+								<Button
+									size="icon"
+									variant="ghost"
+									className="text-background/70 hover:text-background hover:bg-background/10"
+								>
+									<Twitter className="w-5 h-5" />
+								</Button>
+							</Link> */}
+							<Link href="https://www.linkedin.com/company/alamops/" passHref>
+								<Button
+									size="icon"
+									variant="ghost"
+									className="text-background/70 hover:text-background hover:bg-background/10"
+								>
+									<Linkedin className="w-5 h-5" />
+								</Button>
+							</Link>
+
+							<Link href="https://github.com/AlamOps-Consulting" passHref>
+								<Button
+									size="icon"
+									variant="ghost"
+									className="text-background/70 hover:text-background hover:bg-background/10"
+								>
+									<Github className="w-5 h-5" />
+								</Button>
+							</Link>
 						</div>
 					</div>
 
@@ -113,12 +122,18 @@ export function Footer() {
 						<h3 className="font-semibold mb-4">Legal</h3>
 						<ul className="space-y-3 text-background/70">
 							<li>
-								<a href="#" className="hover:text-background transition-colors">
+								<a
+									href="/privacy"
+									className="hover:text-background transition-colors"
+								>
 									Privacy Policy
 								</a>
 							</li>
 							<li>
-								<a href="#" className="hover:text-background transition-colors">
+								<a
+									href="/terms"
+									className="hover:text-background transition-colors"
+								>
 									Terms of Service
 								</a>
 							</li>
@@ -128,7 +143,12 @@ export function Footer() {
 								</a>
 							</li>
 							<li>
-								<a href="#" className="hover:text-background transition-colors">
+								<a
+									href="https://calendly.com/ceo-alamops"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="hover:text-background transition-colors"
+								>
 									Contact
 								</a>
 							</li>
