@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
-import { NewsSection } from "@/components/news-section";
+import NewsSection from "@/components/news-section";
 import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
 import { ProductSection } from "@/components/product-section";

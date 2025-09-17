@@ -9,10 +9,27 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowRight} from "lucide-react";
 import Link from "next/link";
-import { news } from "./data/news";
+import IconRenderer from "@/lib/icon-render";
+import { API_URL } from "@/lib/utils";
 
 
-export function NewsSection() {
+export default async function NewsSection() {
+  const res = await fetch(`${API_URL}/news?limit=6`, {
+    next: { revalidate: 60 }, 
+  });
+
+  if (!res.ok) {
+    // fallback: retornar UI con mensaje o data vacía
+    const fallback = [];
+    return <NewsGrid news={fallback} />;
+  }
+
+  const articles = await res.json();
+
+  return <NewsGrid news={articles.items} />;
+}
+
+function NewsGrid({ news }) {
 	return (
 		<section id="news" className="py-20 lg:py-32 bg-muted/30">
 			<div className="container mx-auto px-4">
@@ -28,7 +45,14 @@ export function NewsSection() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 					{news.map((article, index) => {
-						const IconComponent = article.icon;
+						const formatted = new Date(article.date).toLocaleDateString(
+							"en-US",
+							{
+								month: "long",
+								day: "numeric",
+								year: "numeric",
+							}
+						);
 						return (
 							<Link key={index} href={`/news/${article.slug}`}>
 								<Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-background/80 backdrop-blur-sm h-full">
@@ -42,13 +66,16 @@ export function NewsSection() {
 											</Badge>
 											<div className="flex items-center gap-1 text-sm text-muted-foreground">
 												<Calendar className="w-4 h-4" />
-												{article.date}
+												{formatted}
 											</div>
 										</div>
 
 										<div className="flex items-start gap-3 mb-3">
 											<div className="p-2 rounded-lg bg-primary/10 text-primary">
-												<IconComponent className="w-5 h-5" />
+												<IconRenderer
+													icon={article.icon ?? ""}
+													className="w-5 h-5"
+												/>
 											</div>
 											<CardTitle className="text-xl group-hover:text-primary transition-colors leading-tight">
 												{article.title}
@@ -63,7 +90,7 @@ export function NewsSection() {
 
 										<div className="flex items-center justify-between">
 											<span className="text-sm text-muted-foreground">
-												{article.readTime}
+												{article.readTime} min read
 											</span>
 											<Button
 												variant="ghost"

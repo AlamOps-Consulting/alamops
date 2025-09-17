@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import IconRenderer from "@/lib/icon-render";
+import { API_URL } from "@/lib/utils";
 import {
 	Calendar,
 	ArrowLeft,
@@ -12,116 +14,35 @@ import {
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// Sample news data - in a real app this would come from a CMS or database
-const newsData = {
-	"aws-advanced-consulting-partner": {
-		title: "AWS Advanced Consulting Partner Certification Achieved",
-		date: "March 15, 2025",
-		category: "Certifications",
-		icon: Award,
-		readTime: "3 min read",
-		author: "AlamOps Team",
-		content: `
-      <p>We are thrilled to announce that AlamOps has achieved AWS Advanced Consulting Partner status, marking a significant milestone in our journey as a leading multi-cloud solutions provider.</p>
-      
-      <h3>What This Means for Our Clients</h3>
-      <p>This certification demonstrates our deep technical expertise and proven success in helping customers design, architect, build, migrate, and manage their workloads and applications on AWS. Our team has met rigorous requirements including:</p>
-      
-      <ul>
-        <li>Demonstrated technical proficiency through AWS certifications</li>
-        <li>Proven customer success with complex AWS implementations</li>
-        <li>Investment in AWS training and development programs</li>
-        <li>Commitment to AWS best practices and methodologies</li>
-      </ul>
-      
-      <h3>Enhanced Capabilities</h3>
-      <p>As an AWS Advanced Consulting Partner, we now have access to enhanced support, training, and resources that enable us to deliver even more value to our enterprise clients. This includes priority access to AWS technical resources, advanced training programs, and early access to new AWS services and features.</p>
-      
-      <p>Our expanded capabilities mean we can now offer more comprehensive solutions for complex enterprise migrations, advanced security implementations, and large-scale infrastructure optimization projects.</p>
-    `,
-		image: "/aws-cloud-infrastructure-with-servers-and-data-cen.jpg",
-	},
-	"finops-platform-launch": {
-		title: "Launch of Our Revolutionary FinOps Platform",
-		date: "March 8, 2025",
-		category: "Products",
-		icon: Rocket,
-		readTime: "5 min read",
-		author: "Product Team",
-		content: `
-      <p>Today marks the official launch of our groundbreaking FinOps platform, designed to revolutionize how enterprises manage and optimize their cloud costs across AWS, Azure, and Google Cloud.</p>
-      
-      <h3>Key Features</h3>
-      <p>Our platform introduces several innovative features that set it apart from traditional cloud cost management tools:</p>
-      
-      <ul>
-        <li><strong>Real-time Cost Analytics:</strong> Monitor spending across all cloud providers in real-time</li>
-        <li><strong>Predictive Budgeting:</strong> AI-powered forecasting to prevent budget overruns</li>
-        <li><strong>Automated Optimization:</strong> Smart recommendations and automated actions to reduce costs</li>
-        <li><strong>Multi-Cloud Visibility:</strong> Unified dashboard for all your cloud environments</li>
-      </ul>
-      
-      <h3>Proven Results</h3>
-      <p>During our beta testing phase, clients achieved remarkable results:</p>
-      <ul>
-        <li>Average cost reduction of 40% within the first quarter</li>
-        <li>95% improvement in budget accuracy</li>
-        <li>60% reduction in time spent on cost management tasks</li>
-      </ul>
-      
-      <p>The platform leverages machine learning algorithms to identify cost optimization opportunities that traditional tools often miss, making it an essential tool for any organization serious about cloud cost management.</p>
-    `,
-		image: "/finops-dashboard-with-charts-and-cost-analytics.jpg",
-	},
-	"international-expansion": {
-		title: "International Market Expansion",
-		date: "March 1, 2025",
-		category: "Expansion",
-		icon: Globe,
-		readTime: "4 min read",
-		author: "Executive Team",
-		content: `
-      <p>We're excited to announce our expansion into new international markets, specifically Colombia and Chile, as part of our strategic growth initiative to serve more Latin American enterprises.</p>
-      
-      <h3>Market Opportunity</h3>
-      <p>Latin America represents one of the fastest-growing cloud adoption markets globally, with enterprises increasingly recognizing the need for digital transformation to remain competitive. Our research indicates:</p>
-      
-      <ul>
-        <li>Cloud adoption in Latin America is growing at 25% annually</li>
-        <li>85% of enterprises plan to increase cloud investments in 2024</li>
-        <li>Multi-cloud strategies are becoming the norm for large organizations</li>
-      </ul>
-      
-      <h3>Local Presence, Global Expertise</h3>
-      <p>Our expansion strategy focuses on combining local market knowledge with our proven global expertise in multi-cloud solutions. We're establishing local teams in Bogotá and Santiago to provide:</p>
-      
-      <ul>
-        <li>Native language support and cultural understanding</li>
-        <li>Compliance with local regulations and data sovereignty requirements</li>
-        <li>Faster response times and on-site support when needed</li>
-        <li>Partnerships with local technology providers and system integrators</li>
-      </ul>
-      
-      <p>This expansion reinforces our commitment to helping enterprises across Latin America accelerate their digital transformation journeys with confidence and success.</p>
-    `,
-		image: "/latin-america-map-with-technology-connections-and-.jpg",
-	},
-};
-
 interface PageProps {
 	params: {
 		slug: string;
 	};
 }
 
-export default function NewsDetailPage({ params }: PageProps) {
-	const article = newsData[params.slug as keyof typeof newsData];
+export default async function NewsDetailPage({ params }: PageProps) {
+	const slug = params.slug
 
+	const urlBySlug = `${API_URL}/news/slug/${encodeURIComponent(slug)}`;
+
+  let res = await fetch(urlBySlug, { next: { revalidate: 60 } });
+	if (!res.ok) {
+		// sin resultado
+		notFound();
+	}
+
+
+	const article = await res.json();
+	const formatted = new Date(article.date).toLocaleDateString("en-US", {
+		month: "long",
+		day: "numeric",
+		year: "numeric",
+	});
+	
 	if (!article) {
 		notFound();
 	}
 
-	const IconComponent = article.icon;
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -147,7 +68,7 @@ export default function NewsDetailPage({ params }: PageProps) {
 						<div className="flex items-center gap-4 text-sm text-muted-foreground">
 							<div className="flex items-center gap-1">
 								<Calendar className="w-4 h-4" />
-								{article.date}
+								{formatted}
 							</div>
 							<div className="flex items-center gap-1">
 								<Clock className="w-4 h-4" />
@@ -162,7 +83,7 @@ export default function NewsDetailPage({ params }: PageProps) {
 
 					<div className="flex items-start gap-4 mb-6">
 						<div className="p-3 rounded-xl bg-primary/10 text-primary">
-							<IconComponent className="w-8 h-8" />
+							<IconRenderer icon={article.icon ?? ""} className="w-5 h-5" />
 						</div>
 						<h1 className="text-4xl md:text-5xl font-bold text-balance leading-tight">
 							{article.title}
@@ -173,7 +94,7 @@ export default function NewsDetailPage({ params }: PageProps) {
 				{/* Featured image */}
 				<div className="mb-12">
 					<img
-						src={article.image || "/placeholder.svg"}
+						src={article.image || "/alamops-logo.svg"}
 						alt={article.title}
 						className="w-full h-64 md:h-96 object-cover rounded-xl border"
 					/>
@@ -210,8 +131,3 @@ export default function NewsDetailPage({ params }: PageProps) {
 	);
 }
 
-export function generateStaticParams() {
-	return Object.keys(newsData).map((slug) => ({
-		slug,
-	}));
-}
