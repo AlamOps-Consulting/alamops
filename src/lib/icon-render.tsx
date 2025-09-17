@@ -11,6 +11,11 @@ type Props = {
 	size?: number | string;
 };
 
+type IconProps = {
+	className?: string;
+	size?: number | string;
+};
+
 /**
  * Detecta emoji simple (regex unicode) — si es emoji, renderiza <span>.
  * Si es un nombre de icono, intenta:
@@ -53,7 +58,7 @@ export default function IconRenderer({ icon, className, size = 16 }: Props) {
 	// 2) fallback dinámico (no-SSR) — intenta cargar el icon por nombre desde lucide-react
 	//    dynamic(() => import(...).then(mod => mod[name]))
 	//    Nota: el nombre debe existir en el paquete; si no existe dará error en runtime.
-	const DynamicComp = dynamic(
+	const DynamicComp = dynamic<IconProps>(
 		async () => {
 			const mod = await import("lucide-react");
 			const C = (mod as any)[name];
