@@ -1,5 +1,6 @@
 import React from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -90,6 +91,7 @@ export default function RootLayout({
 				{/* Example: preload a critical font (adjust path/name) */}
 				{/* <link rel="preload" href="/fonts/Inter-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" /> */}
 				{/* Site manifest */}
+				<GoogleAnalytics gaId="G-35GB1BKXPS" />
 				<link rel="manifest" href="/site.webmanifest" />
 			</head>
 
