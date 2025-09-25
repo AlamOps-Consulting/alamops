@@ -4,7 +4,7 @@ on:
 
 name: Deploy `alamops-web` CI/CD
 env:
-  PROJECT_KEY: alamops-web  
+  PROJECT_KEY: alamops-web
   IMAGE_NAME: fjvigil/alamops-web
   DOCKERFILE_PATH: ./Dockerfile
   BUILD_CONTEXT: .
@@ -15,12 +15,7 @@ env:
 jobs:
   deploy:
     name: Deploy
-    # 🔹 Si tienes acceso a larger runners (más CPU/RAM), cambia aquí:
-    # runs-on:
-    #   group: ubuntu-runners
-    #   labels: ubuntu-22.04-16core
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,9 +23,8 @@ jobs:
       - name: Set short GIT_COMMIT
         run: echo "GIT_COMMIT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # Opcional: QEMU solo si quieres multi-arch (consume RAM extra)
-      # - name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -47,12 +41,11 @@ jobs:
           context: ${{ env.BUILD_CONTEXT }}
           file: ${{ env.DOCKERFILE_PATH }}
           push: true
-          platforms: linux/amd64      # 🔹 evita emulación arm64 que rompe SWC
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Evita emulación arm64 (SWC/Rust) y reduce memoria
+          platforms: linux/amd64
           build-args: |
+            ALLOW_SELF_SIGNED_IN_BUILD=true
             NODE_OPTIONS=--max_old_space_size=4096
-            NEXT_TELEMETRY_DISABLED=1
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ env.GIT_COMMIT }}
