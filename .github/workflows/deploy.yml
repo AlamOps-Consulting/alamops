@@ -4,19 +4,18 @@ on:
 
 name: Deploy `alamops-web` CI/CD
 env:
-  PROJECT_KEY: alamops-web  
-  IMAGE_NAME: fjvigil/alamops-web                                                   # nombre del repo en Docker Hub
-  DOCKERFILE_PATH: ./Dockerfile                                               # ruta al Dockerfile
-  BUILD_CONTEXT: .                                                           # contexto de build
-  EXTERNAL_REPO: AlamOps-Consulting/alamops_kube_prod.git   # owner/repo del repo externo a modificar
-  EXTERNAL_REPO_BRANCH: master                                                # rama donde se hará el commit
+  PROJECT_KEY: alamops-web
+  IMAGE_NAME: fjvigil/alamops-web
+  DOCKERFILE_PATH: ./Dockerfile
+  BUILD_CONTEXT: .
+  EXTERNAL_REPO: AlamOps-Consulting/alamops_kube_prod.git
+  EXTERNAL_REPO_BRANCH: master
   MANIFEST_PATH: 07-applications/alamops-web/deployment.yml
-
 
 jobs:
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,19 +23,49 @@ jobs:
       - name: Set short GIT_COMMIT
         run: echo "GIT_COMMIT=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
+      # QEMU solo si vas a compilar multi-arch (arm64). Puedes comentarlo mientras estabilizas amd64.
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Use Node.js
+
+      # Step para Node + cache SÓLO si hay lockfile
+      - name: Use Node.js (with cache if lockfile exists)
+        if: ${{ hashFiles('package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock') != '' }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'            # o usa `.nvmrc` si lo tienes
-          cache: 'npm'
+          node-version: '20'
+          cache: npm
+          # Si usas yarn o pnpm, cambia 'cache' y añade el lockfile correspondiente
+          cache-dependency-path: |
+            package-lock.json
+            npm-shrinkwrap.json
+            yarn.lock
 
-      - name: Pre-build Next.js (surface errors early)
+      - name: Use Node.js (no cache)
+        if: ${{ hashFiles('package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock') == '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Instalación adaptativa: npm ci si hay lockfile; si no, npm install
+      - name: Install deps
         run: |
-          npm ci
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            npm ci
+          elif [ -f yarn.lock ]; then
+            corepack enable && corepack prepare yarn@stable --activate
+            yarn install --frozen-lockfile
+          else
+            echo "No lockfile found. Using npm install (not ideal for CI)."
+            npm install
+          fi
+
+      - name: Lint & Pre-build Next.js
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          NODE_OPTIONS: "--max_old_space_size=4096"
+        run: |
           npm run lint --if-present
-          NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS="--max_old_space_size=4096" npm run build        
+          npm run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -53,6 +82,12 @@ jobs:
           context: ${{ env.BUILD_CONTEXT }}
           file: ${{ env.DOCKERFILE_PATH }}
           push: true
+          # Fija amd64 para evitar problemas de SWC/compilación en arm64 al principio
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_OPTIONS=--max_old_space_size=4096
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ env.GIT_COMMIT }}
@@ -85,9 +120,8 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add "${MANIFEST_PATH}"
             git commit -m "chore: bump image tag to ${GITHUB_SHA::7}"
-            # El remote ya incluye el token por el clone; por si acaso lo reescribimos:
             git remote set-url origin "https://${{ secrets.EXTERNAL_REPO_AUTH }}@github.com/${EXTERNAL_REPO}"
             git push origin "${EXTERNAL_REPO_BRANCH}"
           else
             echo "No hay cambios que commitear."
-          fi            
+          fi
