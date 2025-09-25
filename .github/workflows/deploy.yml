@@ -26,6 +26,17 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'            # o usa `.nvmrc` si lo tienes
+          cache: 'npm'
+
+      - name: Pre-build Next.js (surface errors early)
+        run: |
+          npm ci
+          npm run lint --if-present
+          NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS="--max_old_space_size=4096" npm run build        
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
