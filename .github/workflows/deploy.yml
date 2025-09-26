@@ -46,6 +46,8 @@ jobs:
           build-args: |
             ALLOW_SELF_SIGNED_IN_BUILD=true
             NODE_OPTIONS=--max_old_space_size=4096
+            NEXT_PUBLIC_API_URL="https://back.alamops.com"
+            
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ env.GIT_COMMIT }}
