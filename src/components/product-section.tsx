@@ -203,7 +203,7 @@ export function ProductSection() {
 
 							{/* CTAs */}
 							<div className="flex flex-col sm:flex-row gap-4 mb-8">
-								<Link href="https://iac-dev.alamops.com/" passHref>
+								<Link href="https://iac.alamops.com/" passHref>
 									<Button size="lg" className="text-lg px-8 py-6 group">
 										Start Free Trial
 										<ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -453,7 +453,7 @@ export function ProductSection() {
 						goals faster.
 					</p>
 					<div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-						<Link href="https://iac-dev.alamops.com/" passHref>
+						<Link href="https://iac.alamops.com/" passHref>
 							<Button size="lg" className="text-lg px-8 py-6 group">
 								Start Your Free Trial
 								<ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
