@@ -88,7 +88,8 @@ export function ContactSection() {
 						Contact with us
 					</h2>
 					<p className="text-xl text-muted-foreground text-balance max-w-3xl mx-auto leading-relaxed">
-						Ready to transform your cloud infrastructure? Our experts are here to help you!
+						Ready to transform your cloud infrastructure? Our experts are here
+						to help you!
 					</p>
 				</div>
 
@@ -146,7 +147,7 @@ export function ContactSection() {
 									<Input
 										id="phone"
 										name="phone"
-										placeholder="+34 600 000 000"
+										placeholder="+34614020961"
 										value={form.phone}
 										onChange={handleChange}
 									/>
@@ -198,7 +199,7 @@ export function ContactSection() {
 									</div>
 									<div>
 										<h4 className="font-semibold mb-1">Phone</h4>
-										<p className="text-muted-foreground">+34 624 248 794</p>
+										<p className="text-muted-foreground">+34 61 40 20 961</p>
 									</div>
 								</div>
 
@@ -216,9 +217,7 @@ export function ContactSection() {
 
 						<Card className="border-primary/20 bg-primary/5">
 							<CardContent className="p-6">
-								<h4 className="font-semibold mb-2">
-									Need help urgently?
-								</h4>
+								<h4 className="font-semibold mb-2">Need help urgently?</h4>
 								<p className="text-sm text-foreground/80 mb-4">
 									Our support team is available 24/7 for critical emergencies
 								</p>
