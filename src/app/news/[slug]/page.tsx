@@ -1,16 +1,9 @@
+import { FALLBACK_RAW, normalizeArticles } from "@/components/data/news-fallback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import IconRenderer from "@/lib/icon-render";
 import { API_URL } from "@/lib/utils";
-import {
-	Calendar,
-	ArrowLeft,
-	Award,
-	Rocket,
-	Globe,
-	Clock,
-	User,
-} from "lucide-react";
+import { Calendar, ArrowLeft, Clock, User } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -21,29 +14,87 @@ interface PageProps {
 }
 
 export default async function NewsDetailPage({ params }: PageProps) {
-	const slug = params.slug
+	const slug = params.slug;
 
+	// Si no hay API_URL usamos fallback inmediatamente
+	if (!API_URL) {
+		const fallbackList = normalizeArticles(FALLBACK_RAW);
+		const found = fallbackList.find((a) => a.slug === slug);
+		if (!found) return notFound();
+		const article = found;
+		const formatted = new Date(article.date).toLocaleDateString("en-US", {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		});
+
+		return renderArticle(article, formatted);
+	}
+
+	// Si sí hay API_URL intentamos fetch pero nos protegemos con try/catch
 	const urlBySlug = `${API_URL}/news/slug/${encodeURIComponent(slug)}`;
+	try {
+		const res = await fetch(urlBySlug, { next: { revalidate: 60 } });
+		if (!res.ok) {
+			// si backend devuelve 4xx/5xx caemos al fallback
+			const fallbackList = normalizeArticles(FALLBACK_RAW);
+			const found = fallbackList.find((a) => a.slug === slug);
+			if (!found) return notFound();
+			const article = found;
+			const formatted = new Date(article.date).toLocaleDateString("en-US", {
+				month: "long",
+				day: "numeric",
+				year: "numeric",
+			});
+			return renderArticle(article, formatted);
+		}
 
-  let res = await fetch(urlBySlug, { next: { revalidate: 60 } });
-	if (!res.ok) {
-		// sin resultado
-		notFound();
+		// si res.ok parseamos. Puede venir un objeto single o array.
+		const payload = await res.json();
+		// Normalizamos siempre a través de normalizeArticles
+		const rawItems = payload ? payload.items ?? payload : [];
+		const rawArray = Array.isArray(rawItems) ? rawItems : [rawItems];
+		const normalized = normalizeArticles(rawArray);
+		const article = normalized.find((a) => a.slug === slug);
+
+		if (!article) {
+			// si backend no devolvió el slug, probar fallback
+			const fallbackList = normalizeArticles(FALLBACK_RAW);
+			const found = fallbackList.find((a) => a.slug === slug);
+			if (!found) return notFound();
+			const fArticle = found;
+			const formatted = new Date(fArticle.date).toLocaleDateString("en-US", {
+				month: "long",
+				day: "numeric",
+				year: "numeric",
+			});
+			return renderArticle(fArticle, formatted);
+		}
+
+		const formatted = new Date(article.date).toLocaleDateString("en-US", {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		});
+
+		return renderArticle(article, formatted);
+	} catch (err) {
+		// red/parse error -> fallback
+		const fallbackList = normalizeArticles(FALLBACK_RAW);
+		const found = fallbackList.find((a) => a.slug === slug);
+		if (!found) return notFound();
+		const article = found;
+		const formatted = new Date(article.date).toLocaleDateString("en-US", {
+			month: "long",
+			day: "numeric",
+			year: "numeric",
+		});
+		return renderArticle(article, formatted);
 	}
+}
 
-
-	const article = await res.json();
-	const formatted = new Date(article.date).toLocaleDateString("en-US", {
-		month: "long",
-		day: "numeric",
-		year: "numeric",
-	});
-	
-	if (!article) {
-		notFound();
-	}
-
-
+/** helper para renderizar el JSX del artículo (evita duplicar markup) */
+function renderArticle(article: any, formatted: string) {
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header with back button */}
@@ -130,4 +181,3 @@ export default async function NewsDetailPage({ params }: PageProps) {
 		</div>
 	);
 }
-
