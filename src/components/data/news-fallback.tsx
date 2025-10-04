@@ -44,26 +44,28 @@ function buildExcerpt(content: string, max = 180) {
  */
 export function normalizeArticles(raw: any[]): NewsItem[] {
 	return raw.map((a) => {
-		// sacar fecha: puede venir como { $date: '...' } o string
 		const rawDate = a?.date?.$date ?? a?.date ?? new Date().toISOString();
 		const dateIso =
 			typeof rawDate === "string" ? rawDate : new Date(rawDate).toISOString();
 
 		const content = a.content ?? "";
 		const excerpt = a.excerpt ?? buildExcerpt(content, 200);
+		const _id = String(a._id?.$oid ?? a._id ?? a.id ?? a.slug ?? "");
+
+		const featured = Boolean(a.featured ?? false);
 
 		return {
-			// campos comunes que podría esperar NewsItem; ajusta si tu tipo difiere
-			id: a._id?.$oid ?? a._id ?? a.id ?? a.slug,
+			_id,
 			title: a.title ?? "",
 			slug: a.slug ?? "",
 			category: a.category ?? "",
 			icon: a.icon ?? "",
-			readTime: a.readTime ?? 1,
+			readTime: Number(a.readTime ?? 1),
 			author: a.author ?? "",
 			content,
 			excerpt,
 			date: dateIso,
+			featured,
 		} as NewsItem;
 	});
 }
