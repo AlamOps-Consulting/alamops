@@ -7,8 +7,3 @@ export function cn(...inputs: ClassValue[]) {
 
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-
-if (!API_URL) {
-	throw new Error("API NOT FOUND");
-}

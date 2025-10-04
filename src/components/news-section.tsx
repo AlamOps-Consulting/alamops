@@ -12,23 +12,34 @@ import Link from "next/link";
 import IconRenderer from "@/lib/icon-render";
 import { API_URL } from "@/lib/utils";
 import type { NewsItem, NewsList } from "@/types/news.type";
+import { FALLBACK_RAW, normalizeArticles } from "./data/news-fallback";
 
 
 export default async function NewsSection() {
-  const res = await fetch(`${API_URL}/news?limit=6`, {
-    next: { revalidate: 60 }, 
-  });
+	try {
+		const res = await fetch(`${API_URL}/news?limit=6`, {
+			next: { revalidate: 60 },
+		});
 
-  if (!res.ok) {
-    // fallback: retornar UI con mensaje o data vacía
-    const fallback: [] = [];
-    return <NewsGrid news={fallback} />;
-  }
+		if (!res.ok) {
+			// si falla, usamos tu JSON exacto como fallback (normalizado)
+			const fallback = normalizeArticles(FALLBACK_RAW);
+			return <NewsGrid news={fallback} />;
+		}
 
-  const articles = await res.json();
+		const articles = await res.json();
 
-  return <NewsGrid news={articles.items} />;
+		// si tu backend devuelve { items: [...] } mantenemos ese contrato
+		const items = Array.isArray(articles.items) ? articles.items : articles;
+
+		return <NewsGrid news={normalizeArticles(items)} />;
+	} catch (err) {
+		// cualquier excepción -> fallback
+		const fallback = normalizeArticles(FALLBACK_RAW);
+		return <NewsGrid news={fallback} />;
+	}
 }
+
 
 function NewsGrid({ news }: { news: NewsItem[] }) {
 	return (
