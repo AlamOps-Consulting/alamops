@@ -2,6 +2,7 @@ import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
 import NewsSection from "@/components/news-section";
+import { NewsletterSection } from "@/components/newsletter-section";
 import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
 import { ProductSection } from "@/components/product-section";
@@ -16,6 +17,7 @@ export default function HomePage() {
 				<ServicesSection />
 				<ProductSection />
 				<NewsSection />
+				<NewsletterSection />
 				<ContactSection />
 				<Footer />
 			</div>
