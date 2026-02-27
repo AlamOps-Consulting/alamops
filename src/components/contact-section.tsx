@@ -189,7 +189,7 @@ export function ContactSection() {
 									</div>
 									<div>
 										<h4 className="font-semibold mb-1">Email</h4>
-										<p className="text-muted-foreground">info@alamops.com</p>
+										<p className="text-muted-foreground">support@alamops.com</p>
 									</div>
 								</div>
 
