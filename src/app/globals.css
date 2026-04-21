@@ -1,5 +1,24 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
+
+:root {
+  --lp-cream: #faf8f3;
+  --lp-ink: #1a1a17;
+  --lp-olive: #5a6a3a;
+  --lp-olive-soft: #7a8a5a;
+  --lp-hairline: rgba(26, 26, 23, 0.15);
+  --lp-faint: rgba(26, 26, 23, 0.06);
+  --font-serif: "Fraunces", "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.landing, .landing * {
+  font-family: var(--font-serif);
+}
+.landing .mono {
+  font-family: var(--font-mono);
+}
 
 @custom-variant dark (&:is(.dark *));
 

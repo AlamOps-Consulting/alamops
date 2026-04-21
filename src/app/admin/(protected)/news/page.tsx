@@ -3,8 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { listNews, deleteNews } from "@/lib/admin-api";
 
 interface NewsItem {
@@ -62,98 +60,163 @@ export default function AdminNewsPage() {
   const totalPages = data ? Math.ceil(data.total / data.per_page) : 1;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">News Articles</h2>
-        <Link href="/admin/news/new">
-          <Button size="sm">+ New Article</Button>
+    <div className="max-w-6xl">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-14 pb-6 border-b border-[#1a1a17]/15">
+        <div>
+          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-3">
+            / 01 &nbsp; Catalogue
+          </div>
+          <h2 className="text-5xl font-light tracking-tight">
+            News <span className="italic text-[#5a6a3a]">articles.</span>
+          </h2>
+          <p className="mono text-[11px] tracking-[0.2em] uppercase text-[#1a1a17]/50 mt-4">
+            {data ? `${data.total} records` : "—"}
+          </p>
+        </div>
+        <Link
+          href="/admin/news/new"
+          className="mono text-[11px] tracking-[0.3em] uppercase bg-[#1a1a17] text-[#faf8f3] px-6 py-4 hover:bg-[#5a6a3a] transition-colors"
+        >
+          + New article
         </Link>
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Loading…</p>
+        <p className="mono text-[11px] tracking-[0.25em] uppercase text-[#1a1a17]/50">
+          Loading…
+        </p>
       ) : (
         <>
-          <div className="rounded-md border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">Title</th>
-                  <th className="text-left px-4 py-3 font-medium">Category</th>
-                  <th className="text-left px-4 py-3 font-medium">Date</th>
-                  <th className="text-left px-4 py-3 font-medium">Featured</th>
-                  <th className="px-4 py-3 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(data?.items ?? []).map((item) => (
-                  <tr key={item._id} className="border-t hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 max-w-xs truncate font-medium">{item.title}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant="secondary">{item.category}</Badge>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {item.date ? new Date(item.date).toLocaleDateString() : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {item.featured ? (
-                        <Badge>Featured</Badge>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right space-x-2">
-                      <Link href={`/admin/news/${item._id}/edit`}>
-                        <Button size="sm" variant="outline">Edit</Button>
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[#1a1a17]/15">
+                <Th width="50%">Title</Th>
+                <Th width="15%">Category</Th>
+                <Th width="15%">Date</Th>
+                <Th width="10%">Featured</Th>
+                <Th width="10%" align="right">
+                  &nbsp;
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data?.items ?? []).map((item, idx) => (
+                <tr
+                  key={item._id}
+                  className="border-b border-[#1a1a17]/10 hover:bg-[#1a1a17]/[0.03] transition-colors group"
+                >
+                  <td className="py-5 pr-4">
+                    <div className="flex items-baseline gap-4">
+                      <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/30 w-8">
+                        {String(idx + 1 + (page - 1) * 20).padStart(2, "0")}
+                      </span>
+                      <span className="text-lg tracking-tight truncate group-hover:text-[#5a6a3a] transition-colors">
+                        {item.title}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-5 pr-4">
+                    <span className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70">
+                      {item.category}
+                    </span>
+                  </td>
+                  <td className="py-5 pr-4">
+                    <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/50">
+                      {item.date
+                        ? new Date(item.date)
+                            .toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                            .toUpperCase()
+                        : "—"}
+                    </span>
+                  </td>
+                  <td className="py-5 pr-4">
+                    {item.featured ? (
+                      <span className="mono text-[10px] tracking-[0.25em] uppercase text-[#5a6a3a]">
+                        ★ featured
+                      </span>
+                    ) : (
+                      <span className="text-[#1a1a17]/20">—</span>
+                    )}
+                  </td>
+                  <td className="py-5 text-right">
+                    <div className="inline-flex items-center gap-5">
+                      <Link
+                        href={`/admin/news/${item._id}/edit`}
+                        className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors"
+                      >
+                        Edit
                       </Link>
-                      <Button
-                        size="sm"
-                        variant="destructive"
+                      <button
                         disabled={deleting === item._id}
                         onClick={() => handleDelete(item._id, item.title)}
+                        className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#a33] transition-colors disabled:opacity-40"
                       >
-                        {deleting === item._id ? "Deleting…" : "Delete"}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {(data?.items ?? []).length === 0 && (
-                  <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
-                      No articles yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                        {deleting === item._id ? "…" : "Delete"}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {(data?.items ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="py-20 text-center mono text-[11px] tracking-[0.3em] uppercase text-[#1a1a17]/40"
+                  >
+                    ╱╱ no articles yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
 
-          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                size="sm"
-                variant="outline"
+            <div className="flex items-center justify-end gap-6 mt-10">
+              <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
+                className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
+                ← Previous
+              </button>
+              <span className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/50">
+                {String(page).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
+              <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
+                className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Next
-              </Button>
+                Next →
+              </button>
             </div>
           )}
         </>
       )}
     </div>
+  );
+}
+
+function Th({
+  children,
+  width,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  width?: string;
+  align?: "left" | "right";
+}) {
+  return (
+    <th
+      style={{ width, textAlign: align }}
+      className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/50 font-normal pb-4 pr-4"
+    >
+      {children}
+    </th>
   );
 }
