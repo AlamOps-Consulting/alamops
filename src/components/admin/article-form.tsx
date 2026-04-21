@@ -262,7 +262,8 @@ export function ArticleForm({
 
 /* ── Field primitives ─────────────────────────────────────────── */
 
-interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface FieldProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size"> {
   label: string;
   index: string;
   hint?: string;
