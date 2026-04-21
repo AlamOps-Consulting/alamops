@@ -32,7 +32,7 @@ export function HeroSection() {
         }}
       />
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12 pt-60 md:pt-112 pb-20 md:pb-24">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-12 pt-60 md:pt-82 pb-20 md:pb-24">
         <div className="grid md:grid-cols-12 gap-8 md:gap-12 items-center">
           <h1 className="md:col-span-8 text-[clamp(2.75rem,7.5vw,6.5rem)] leading-[1.02] tracking-[-0.03em] font-light">
             {t.hero.headline_a}{" "}
