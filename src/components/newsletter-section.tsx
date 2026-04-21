@@ -1,117 +1,94 @@
 "use client";
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { API_URL } from "@/lib/utils";
+import { useLocale } from "./locale-provider";
 
 export function NewsletterSection() {
-	const [email, setEmail] = useState("");
-	const [isSubscribing, setIsSubscribing] = useState(false);
+  const { t } = useLocale();
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setIsSubscribing(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      const response = await fetch(`${API_URL}/newsletter/subscribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (response.status === 201) {
+        toast.success(t.newsletter.toast.success, {
+          description: t.newsletter.toast.successDesc,
+        });
+        setEmail("");
+      } else if (response.status === 409) {
+        toast.info(t.newsletter.toast.already);
+      } else if (response.status === 400) {
+        toast.error(t.newsletter.toast.invalid);
+      } else {
+        toast.error(t.newsletter.toast.fail);
+      }
+    } catch {
+      toast.error(t.newsletter.toast.offline);
+    } finally {
+      setSending(false);
+    }
+  };
 
-		try {
-			const response = await fetch(`${API_URL}/newsletter/subscribe`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ email }),
-			});
+  return (
+    <section
+      aria-labelledby="newsletter-title"
+      className="landing bg-[#faf8f3] text-[#1a1a17] py-20 md:py-28 border-t border-[#1a1a17]/10"
+    >
+      <div className="max-w-3xl mx-auto px-6 md:px-12 text-center">
+        <div className="inline-flex items-center justify-center w-14 h-14 border border-[#5a6a3a]/30 bg-[#5a6a3a]/5 mb-8">
+          <Mail className="w-5 h-5 text-[#5a6a3a]" />
+        </div>
 
-			if (response.status === 201) {
-				toast.success("Thanks for subscribing!", {
-					description: "You'll receive our latest updates and news.",
-					duration: 5000,
-				});
-				setEmail("");
-			} else if (response.status === 409) {
-				toast.info("You're already subscribed!", {
-					description: "This email is already in our newsletter list.",
-					duration: 5000,
-				});
-			} else if (response.status === 400) {
-				toast.error("Invalid email", {
-					description: "Please enter a valid email address.",
-					duration: 5000,
-				});
-			} else {
-				toast.error("Something went wrong", {
-					description: "Please try again later.",
-					duration: 5000,
-				});
-			}
-		} catch (error) {
-			console.error("Newsletter subscription error:", error);
-			toast.error("Connection error", {
-				description: "Could not connect to the server. Please try again.",
-				duration: 5000,
-			});
-		} finally {
-			setIsSubscribing(false);
-		}
-	};
+        <h2
+          id="newsletter-title"
+          className="text-4xl md:text-5xl font-light leading-[1] tracking-tight mb-4"
+        >
+          {t.newsletter.title_a}{" "}
+          <span className="italic text-[#5a6a3a]">
+            {t.newsletter.title_b}
+          </span>
+        </h2>
+        <p className="text-base leading-relaxed text-[#1a1a17]/70 max-w-lg mx-auto mb-10">
+          {t.newsletter.description}
+        </p>
 
-	return (
-		<section className="py-20 lg:py-32 bg-gradient-to-b from-background to-muted/30">
-			<div className="container mx-auto px-4">
-				<div className="max-w-4xl mx-auto">
-					<Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-						<CardHeader className="text-center">
-							<div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-								<Mail className="w-8 h-8 text-primary" />
-							</div>
-							<CardTitle className="text-3xl md:text-4xl font-bold">
-								Subscribe to Our Newsletter
-							</CardTitle>
-							<CardDescription className="text-lg mt-2">
-								Stay updated with the latest cloud infrastructure insights, best
-								practices, and AlamOps news
-							</CardDescription>
-						</CardHeader>
-
-						<CardContent>
-							<form
-								onSubmit={handleSubmit}
-								className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto"
-							>
-								<Input
-									type="email"
-									placeholder="Enter your email address"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									required
-									className="flex-1"
-									disabled={isSubscribing}
-								/>
-								<Button
-									type="submit"
-									size="lg"
-									disabled={isSubscribing}
-									className="sm:w-auto"
-								>
-									{isSubscribing ? "Subscribing..." : "Subscribe"}
-								</Button>
-							</form>
-							<p className="text-sm text-muted-foreground text-center mt-4">
-								We respect your privacy. Unsubscribe at any time.
-							</p>
-						</CardContent>
-					</Card>
-				</div>
-			</div>
-		</section>
-	);
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto"
+        >
+          <input
+            type="email"
+            placeholder={t.newsletter.placeholder}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={sending}
+            aria-label="Email address"
+            className="flex-1 bg-transparent border border-[#1a1a17]/25 px-4 py-3 text-base tracking-tight focus:outline-none focus:border-[#5a6a3a] transition-colors"
+            style={{ fontFamily: "inherit" }}
+          />
+          <button
+            type="submit"
+            disabled={sending}
+            className="mono text-[11px] tracking-[0.3em] uppercase bg-[#1a1a17] text-[#faf8f3] px-6 py-3 hover:bg-[#5a6a3a] transition-colors disabled:opacity-60"
+          >
+            {sending ? t.newsletter.subscribing : t.newsletter.subscribe}
+          </button>
+        </form>
+        <p className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/45 mt-4">
+          {t.newsletter.footnote}
+        </p>
+      </div>
+    </section>
+  );
 }
