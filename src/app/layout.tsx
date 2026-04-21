@@ -5,6 +5,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { LocaleProvider } from "@/components/locale-provider";
+import { ChatWidgetMount } from "@/components/chat-widget-mount";
 import { SPANISH_COUNTRIES, type Locale } from "@/lib/i18n";
 
 const SITE_URL = "https://alamops.com";
@@ -284,6 +285,7 @@ export default async function RootLayout({
       <body>
         <LocaleProvider initialLocale={initialLocale}>
           <main>{children}</main>
+          <ChatWidgetMount />
           <Toaster />
         </LocaleProvider>
       </body>

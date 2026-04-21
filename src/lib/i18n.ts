@@ -208,7 +208,31 @@ export const dict = {
         contact: "Contact",
       },
       rights: "All rights reserved.",
-    
+
+    },
+    chat: {
+      launcherLabel: "Ask",
+      launcherHint: "Any question — real humans, real answers.",
+      launcherHeadline_a: "Got a",
+      launcherHeadline_b: "question?",
+      title_a: "Ask",
+      title_b: "AlamOps.",
+      status: "Online",
+      intro:
+        "Ask about multi-cloud strategy, security, DevOps or FinOps. An AlamOps assistant will reply in a moment.",
+      placeholder: "Write your question…",
+      send: "Send",
+      sending: "Thinking…",
+      close: "Close",
+      you: "You",
+      bot: "AlamOps",
+      errors: {
+        empty: "Type something first.",
+        tooLong: "Message is too long.",
+        rateLimit: "Too many messages. Try again in a minute.",
+        offline: "Couldn't reach the server. Try again.",
+        failed: "Something went wrong. Please retry.",
+      },
     },
   },
   es: {
@@ -395,7 +419,31 @@ export const dict = {
         contact: "Contacto",
       },
       rights: "Todos los derechos reservados.",
-  
+
+    },
+    chat: {
+      launcherLabel: "Preguntar",
+      launcherHint: "Cualquier duda — personas reales, respuestas reales.",
+      launcherHeadline_a: "¿Tienes una",
+      launcherHeadline_b: "pregunta?",
+      title_a: "Pregunta a",
+      title_b: "AlamOps.",
+      status: "En línea",
+      intro:
+        "Pregunta sobre estrategia multi-cloud, seguridad, DevOps o FinOps. Un asistente de AlamOps responderá en un momento.",
+      placeholder: "Escribe tu pregunta…",
+      send: "Enviar",
+      sending: "Pensando…",
+      close: "Cerrar",
+      you: "Tú",
+      bot: "AlamOps",
+      errors: {
+        empty: "Escribe algo primero.",
+        tooLong: "El mensaje es demasiado largo.",
+        rateLimit: "Demasiados mensajes. Inténtalo en un minuto.",
+        offline: "No se pudo conectar al servidor. Inténtalo de nuevo.",
+        failed: "Algo salió mal. Vuelve a intentarlo.",
+      },
     },
   },
 } as const;
