@@ -84,7 +84,6 @@ export function Footer() {
           <span>
             © {new Date().getFullYear()} AlamOps. {t.footer.rights}
           </span>
-          <span>{t.footer.madeWith}</span>
         </div>
       </div>
     </footer>
