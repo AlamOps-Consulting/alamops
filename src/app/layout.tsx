@@ -233,8 +233,8 @@ const websiteJsonLd = {
   },
 };
 
-function detectLocaleFromHeaders(): Locale {
-  const h = headers();
+async function detectLocaleFromHeaders(): Promise<Locale> {
+  const h = await headers();
   const country = (
     h.get("x-vercel-ip-country") ??
     h.get("cf-ipcountry") ??
@@ -252,12 +252,12 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const jar = cookies();
+  const jar = await cookies();
   const cookieLang = jar.get("lang")?.value as Locale | undefined;
   const initialLocale: Locale =
     cookieLang === "es" || cookieLang === "en"
       ? cookieLang
-      : detectLocaleFromHeaders();
+      : await detectLocaleFromHeaders();
 
   return (
     <html lang={initialLocale}>
