@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin } from "lucide-react";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "./locale-provider";
@@ -35,18 +35,31 @@ export function Footer() {
             </p>
             <div className="flex gap-4 mt-6">
               <Link
-                href="https://www.linkedin.com/company/alamops/"
+                href="https://www.linkedin.com/company/105381523/"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="LinkedIn"
                 className="text-[#faf8f3]/60 hover:text-[#a8b872] transition-colors"
               >
                 <Linkedin className="w-5 h-5" />
               </Link>
               <Link
-                href="https://github.com/AlamOps-Consulting"
-                aria-label="GitHub"
+                href="https://www.instagram.com/alamopsconsulting/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 className="text-[#faf8f3]/60 hover:text-[#a8b872] transition-colors"
               >
-                <Github className="w-5 h-5" />
+                <Instagram className="w-5 h-5" />
+              </Link>
+              <Link
+                href="https://www.facebook.com/profile.php?id=61583101425689"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="text-[#faf8f3]/60 hover:text-[#a8b872] transition-colors"
+              >
+                <Facebook className="w-5 h-5" />
               </Link>
             </div>
           </div>
