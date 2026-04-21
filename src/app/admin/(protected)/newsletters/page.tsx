@@ -2,9 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { listSubscribers, addSubscriber, unsubscribeSubscriber } from "@/lib/admin-api";
 
 interface Subscriber {
@@ -59,7 +56,7 @@ export default function AdminNewslettersPage() {
     setAddingEmail(true);
     try {
       await addSubscriber(addEmail);
-      toast.success("Subscriber added successfully");
+      toast.success("Subscriber added");
       setAddEmail("");
       fetchSubscribers();
     } catch (err: unknown) {
@@ -84,131 +81,234 @@ export default function AdminNewslettersPage() {
 
   const totalPages = data ? Math.ceil(data.total / data.per_page) : 1;
 
-  const filterButtons: { label: string; value: Filter }[] = [
-    { label: "All", value: "all" },
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
+  const filterTabs: { label: string; value: Filter; idx: string }[] = [
+    { label: "All", value: "all", idx: "01" },
+    { label: "Active", value: "active", idx: "02" },
+    { label: "Inactive", value: "inactive", idx: "03" },
   ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Newsletter Subscribers</h2>
-        <span className="text-sm text-muted-foreground">
-          {data ? `${data.total} total` : ""}
-        </span>
+    <div className="max-w-6xl">
+      {/* Header */}
+      <div className="flex items-end justify-between mb-14 pb-6 border-b border-[#1a1a17]/15">
+        <div>
+          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-3">
+            / 02 &nbsp; Audience
+          </div>
+          <h2 className="text-5xl font-light tracking-tight">
+            Newsletter <span className="italic text-[#5a6a3a]">subscribers.</span>
+          </h2>
+          <p className="mono text-[11px] tracking-[0.2em] uppercase text-[#1a1a17]/50 mt-4">
+            {data ? `${data.total} records` : "—"}
+          </p>
+        </div>
       </div>
 
-      {/* Add email form */}
-      <form onSubmit={handleAddEmail} className="flex gap-2">
-        <Input
-          type="email"
-          placeholder="Add email to newsletter..."
-          value={addEmail}
-          onChange={(e) => setAddEmail(e.target.value)}
-          required
-          className="max-w-sm"
-        />
-        <Button type="submit" disabled={addingEmail}>
-          {addingEmail ? "Adding…" : "Add"}
-        </Button>
+      {/* Add form */}
+      <form onSubmit={handleAddEmail} className="mb-12">
+        <div className="flex items-baseline justify-between mb-3">
+          <label
+            htmlFor="add-email"
+            className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/60"
+          >
+            Add subscriber
+          </label>
+          <span className="mono text-[10px] tracking-[0.25em] text-[#1a1a17]/30">
+            +
+          </span>
+        </div>
+        <div className="flex gap-6 items-end">
+          <input
+            id="add-email"
+            type="email"
+            placeholder="name@domain.com"
+            value={addEmail}
+            onChange={(e) => setAddEmail(e.target.value)}
+            required
+            className="flex-1 max-w-md bg-transparent border-0 border-b border-[#1a1a17]/30 pb-2 text-lg tracking-tight focus:outline-none focus:border-[#5a6a3a] transition-colors"
+            style={{ fontFamily: "inherit" }}
+          />
+          <button
+            type="submit"
+            disabled={addingEmail}
+            className="mono text-[11px] tracking-[0.3em] uppercase bg-[#1a1a17] text-[#faf8f3] px-6 py-3 hover:bg-[#5a6a3a] transition-colors disabled:opacity-60"
+          >
+            {addingEmail ? "Adding…" : "Add →"}
+          </button>
+        </div>
       </form>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2">
-        {filterButtons.map(({ label, value }) => (
-          <Button
-            key={value}
-            size="sm"
-            variant={filter === value ? "default" : "outline"}
-            onClick={() => handleFilterChange(value)}
-          >
-            {label}
-          </Button>
-        ))}
+      {/* Filters */}
+      <div className="flex items-center gap-8 mb-8">
+        <span className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/40">
+          Filter
+        </span>
+        {filterTabs.map(({ label, value, idx }) => {
+          const active = filter === value;
+          return (
+            <button
+              key={value}
+              onClick={() => handleFilterChange(value)}
+              className="group relative py-2"
+            >
+              <span className="inline-flex items-baseline gap-2">
+                <span
+                  className={`mono text-[10px] tracking-[0.25em] ${
+                    active ? "text-[#5a6a3a]" : "text-[#1a1a17]/30"
+                  }`}
+                >
+                  {idx}
+                </span>
+                <span
+                  className={`text-sm tracking-tight transition-colors ${
+                    active
+                      ? "text-[#5a6a3a] italic"
+                      : "text-[#1a1a17]/70 group-hover:text-[#1a1a17]"
+                  }`}
+                >
+                  {label}
+                </span>
+              </span>
+              <span
+                className={`absolute left-0 -bottom-0 h-px transition-all ${
+                  active ? "w-full bg-[#5a6a3a]" : "w-0 bg-[#1a1a17]/30"
+                }`}
+              />
+            </button>
+          );
+        })}
       </div>
 
       {loading ? (
-        <p className="text-muted-foreground text-sm">Loading…</p>
+        <p className="mono text-[11px] tracking-[0.25em] uppercase text-[#1a1a17]/50">
+          Loading…
+        </p>
       ) : (
         <>
-          <div className="rounded-md border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-muted-foreground">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">Email</th>
-                  <th className="text-left px-4 py-3 font-medium">Subscribed At</th>
-                  <th className="text-left px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {(data?.items ?? []).map((sub) => (
-                  <tr key={sub._id} className="border-t hover:bg-muted/20 transition-colors">
-                    <td className="px-4 py-3 font-medium">{sub.email}</td>
-                    <td className="px-4 py-3 text-muted-foreground">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-[#1a1a17]/15">
+                <Th width="50%">Email</Th>
+                <Th width="25%">Subscribed</Th>
+                <Th width="15%">Status</Th>
+                <Th width="10%" align="right">
+                  &nbsp;
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {(data?.items ?? []).map((sub, idx) => (
+                <tr
+                  key={sub._id}
+                  className="border-b border-[#1a1a17]/10 hover:bg-[#1a1a17]/[0.03] transition-colors"
+                >
+                  <td className="py-5 pr-4">
+                    <div className="flex items-baseline gap-4">
+                      <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/30 w-8">
+                        {String(idx + 1 + (page - 1) * 20).padStart(2, "0")}
+                      </span>
+                      <span className="mono text-sm tracking-tight text-[#1a1a17]">
+                        {sub.email}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-5 pr-4">
+                    <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/50">
                       {sub.subscribed_at
-                        ? new Date(sub.subscribed_at).toLocaleDateString()
+                        ? new Date(sub.subscribed_at)
+                            .toLocaleDateString("en-US", {
+                              year: "numeric",
+                              month: "short",
+                              day: "2-digit",
+                            })
+                            .toUpperCase()
                         : "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      {sub.active ? (
-                        <Badge>Active</Badge>
-                      ) : (
-                        <Badge variant="secondary">Inactive</Badge>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {sub.active && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={unsubscribingId === sub._id}
-                          onClick={() => handleUnsubscribe(sub)}
-                        >
-                          {unsubscribingId === sub._id ? "…" : "Unsubscribe"}
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {(data?.items ?? []).length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-muted-foreground">
-                      No subscribers found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </td>
+                  <td className="py-5 pr-4">
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className={`inline-block w-1.5 h-1.5 rounded-full ${
+                          sub.active ? "bg-[#5a6a3a]" : "bg-[#1a1a17]/25"
+                        }`}
+                      />
+                      <span
+                        className={`mono text-[10px] tracking-[0.3em] uppercase ${
+                          sub.active ? "text-[#5a6a3a]" : "text-[#1a1a17]/40"
+                        }`}
+                      >
+                        {sub.active ? "active" : "inactive"}
+                      </span>
+                    </span>
+                  </td>
+                  <td className="py-5 text-right">
+                    {sub.active && (
+                      <button
+                        disabled={unsubscribingId === sub._id}
+                        onClick={() => handleUnsubscribe(sub)}
+                        className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#a33] transition-colors disabled:opacity-40"
+                      >
+                        {unsubscribingId === sub._id ? "…" : "Unsubscribe"}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {(data?.items ?? []).length === 0 && (
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="py-20 text-center mono text-[11px] tracking-[0.3em] uppercase text-[#1a1a17]/40"
+                  >
+                    ╱╱ no subscribers found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
 
-          {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center gap-2 justify-end">
-              <Button
-                size="sm"
-                variant="outline"
+            <div className="flex items-center justify-end gap-6 mt-10">
+              <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
+                className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Page {page} of {totalPages}
+                ← Previous
+              </button>
+              <span className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/50">
+                {String(page).padStart(2, "0")} / {String(totalPages).padStart(2, "0")}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
+              <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => p + 1)}
+                className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                Next
-              </Button>
+                Next →
+              </button>
             </div>
           )}
         </>
       )}
     </div>
+  );
+}
+
+function Th({
+  children,
+  width,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  width?: string;
+  align?: "left" | "right";
+}) {
+  return (
+    <th
+      style={{ width, textAlign: align }}
+      className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/50 font-normal pb-4 pr-4"
+    >
+      {children}
+    </th>
   );
 }

@@ -1,183 +1,194 @@
 import { FALLBACK_RAW, normalizeArticles } from "@/components/data/news-fallback";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import IconRenderer from "@/lib/icon-render";
 import { API_URL } from "@/lib/utils";
-import { Calendar, ArrowLeft, Clock, User } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { NewsItem } from "@/types/news.type";
 
 interface PageProps {
-	params: {
-		slug: string;
-	};
+  params: { slug: string };
 }
 
 export default async function NewsDetailPage({ params }: PageProps) {
-	const slug = params.slug;
+  const slug = params.slug;
+  const article = await loadArticle(slug);
+  if (!article) return notFound();
 
-	// Si no hay API_URL usamos fallback inmediatamente
-	if (!API_URL) {
-		const fallbackList = normalizeArticles(FALLBACK_RAW);
-		const found = fallbackList.find((a) => a.slug === slug);
-		if (!found) return notFound();
-		const article = found;
-		const formatted = new Date(article.date).toLocaleDateString("en-US", {
-			month: "long",
-			day: "numeric",
-			year: "numeric",
-		});
+  const formatted = new Date(article.date)
+    .toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-		return renderArticle(article, formatted);
-	}
-
-	// Si sí hay API_URL intentamos fetch pero nos protegemos con try/catch
-	const urlBySlug = `${API_URL}/news/slug/${encodeURIComponent(slug)}`;
-	try {
-		const res = await fetch(urlBySlug, { next: { revalidate: 60 } });
-		if (!res.ok) {
-			// si backend devuelve 4xx/5xx caemos al fallback
-			const fallbackList = normalizeArticles(FALLBACK_RAW);
-			const found = fallbackList.find((a) => a.slug === slug);
-			if (!found) return notFound();
-			const article = found;
-			const formatted = new Date(article.date).toLocaleDateString("en-US", {
-				month: "long",
-				day: "numeric",
-				year: "numeric",
-			});
-			return renderArticle(article, formatted);
-		}
-
-		// si res.ok parseamos. Puede venir un objeto single o array.
-		const payload = await res.json();
-		// Normalizamos siempre a través de normalizeArticles
-		const rawItems = payload ? payload.items ?? payload : [];
-		const rawArray = Array.isArray(rawItems) ? rawItems : [rawItems];
-		const normalized = normalizeArticles(rawArray);
-		const article = normalized.find((a) => a.slug === slug);
-
-		if (!article) {
-			// si backend no devolvió el slug, probar fallback
-			const fallbackList = normalizeArticles(FALLBACK_RAW);
-			const found = fallbackList.find((a) => a.slug === slug);
-			if (!found) return notFound();
-			const fArticle = found;
-			const formatted = new Date(fArticle.date).toLocaleDateString("en-US", {
-				month: "long",
-				day: "numeric",
-				year: "numeric",
-			});
-			return renderArticle(fArticle, formatted);
-		}
-
-		const formatted = new Date(article.date).toLocaleDateString("en-US", {
-			month: "long",
-			day: "numeric",
-			year: "numeric",
-		});
-
-		return renderArticle(article, formatted);
-	} catch (err) {
-		// red/parse error -> fallback
-		const fallbackList = normalizeArticles(FALLBACK_RAW);
-		const found = fallbackList.find((a) => a.slug === slug);
-		if (!found) return notFound();
-		const article = found;
-		const formatted = new Date(article.date).toLocaleDateString("en-US", {
-			month: "long",
-			day: "numeric",
-			year: "numeric",
-		});
-		return renderArticle(article, formatted);
-	}
+  return renderArticle(article, formatted);
 }
 
-/** helper para renderizar el JSX del artículo (evita duplicar markup) */
-function renderArticle(article: any, formatted: string) {
-	return (
-		<div className="min-h-screen bg-background">
-			{/* Header with back button */}
-			<div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-				<div className="container mx-auto px-4 py-4">
-					<Link href="/#news">
-						<Button variant="ghost" size="sm" className="group">
-							<ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-							Back to News
-						</Button>
-					</Link>
-				</div>
-			</div>
+async function loadArticle(slug: string): Promise<NewsItem | null> {
+  const fallback = () => {
+    const list = normalizeArticles(FALLBACK_RAW);
+    return list.find((a) => a.slug === slug) ?? null;
+  };
 
-			<article className="container mx-auto px-4 py-12 max-w-4xl">
-				{/* Article header */}
-				<div className="mb-8">
-					<div className="flex items-center gap-4 mb-6">
-						<Badge variant="secondary" className="text-sm">
-							{article.category}
-						</Badge>
-						<div className="flex items-center gap-4 text-sm text-muted-foreground">
-							<div className="flex items-center gap-1">
-								<Calendar className="w-4 h-4" />
-								{formatted}
-							</div>
-							<div className="flex items-center gap-1">
-								<Clock className="w-4 h-4" />
-								{article.readTime}
-							</div>
-							<div className="flex items-center gap-1">
-								<User className="w-4 h-4" />
-								{article.author}
-							</div>
-						</div>
-					</div>
+  if (!API_URL) return fallback();
 
-					<div className="flex items-start gap-4 mb-6">
-						<div className="p-3 rounded-xl bg-primary/10 text-primary">
-							<IconRenderer icon={article.icon ?? ""} className="w-5 h-5" />
-						</div>
-						<h1 className="text-4xl md:text-5xl font-bold text-balance leading-tight">
-							{article.title}
-						</h1>
-					</div>
-				</div>
+  try {
+    const res = await fetch(
+      `${API_URL}/news/slug/${encodeURIComponent(slug)}`,
+      { next: { revalidate: 60 } }
+    );
+    if (!res.ok) return fallback();
+    const payload = await res.json();
+    const raw = Array.isArray(payload?.items ?? payload)
+      ? payload.items ?? payload
+      : [payload];
+    const normalized = normalizeArticles(raw);
+    return normalized.find((a) => a.slug === slug) ?? fallback();
+  } catch {
+    return fallback();
+  }
+}
 
-				{/* Featured image */}
-				<div className="mb-12">
-					<img
-						src={article.image || "/alamops-logo.svg"}
-						alt={article.title}
-						className="w-full h-64 md:h-96 object-cover rounded-xl border"
-					/>
-				</div>
+function renderArticle(article: NewsItem, formatted: string) {
+  return (
+    <div className="landing min-h-screen bg-[#faf8f3] text-[#1a1a17]">
+      {/* Slim top bar */}
+      <header className="sticky top-0 z-40 bg-[#faf8f3]/90 backdrop-blur-sm border-b border-[#1a1a17]/10">
+        <div className="max-w-[1200px] mx-auto px-6 md:px-12 h-14 flex items-center justify-between">
+          <Link
+            href="/#news"
+            className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to news
+          </Link>
+          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/50">
+            Journal · {article.category}
+          </div>
+        </div>
+      </header>
 
-				{/* Article content */}
-				<div className="prose prose-lg max-w-none">
-					<div
-						dangerouslySetInnerHTML={{ __html: article.content }}
-						className="space-y-6 text-foreground/90 leading-relaxed"
-					/>
-				</div>
+      <article className="max-w-[1100px] mx-auto px-6 md:px-12 py-16 md:py-24">
+        {/* Category kicker */}
+        <div className="flex items-center gap-4 mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-8">
+          <span className="flex items-center justify-center w-9 h-9 border border-[#5a6a3a]/30 bg-[#5a6a3a]/5 text-[#5a6a3a]">
+            <IconRenderer icon={article.icon ?? ""} className="w-4 h-4" />
+          </span>
+          <span>{article.category}</span>
+          <span className="text-[#1a1a17]/20">·</span>
+          <span className="text-[#1a1a17]/55">{formatted}</span>
+          {article.readTime ? (
+            <>
+              <span className="text-[#1a1a17]/20">·</span>
+              <span className="text-[#1a1a17]/55">
+                {article.readTime} min read
+              </span>
+            </>
+          ) : null}
+        </div>
 
-				{/* Call to action */}
-				<div className="mt-16 p-8 bg-muted/50 rounded-xl border">
-					<div className="text-center">
-						<h3 className="text-2xl font-bold mb-4">
-							Ready to Transform Your Cloud Strategy?
-						</h3>
-						<p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-							Let our experts help you optimize your multi-cloud infrastructure
-							and achieve better results.
-						</p>
-						<Link href="/#contact">
-							<Button size="lg" className="group">
-								Get Started Today
-								<ArrowLeft className="ml-2 w-5 h-5 rotate-180 group-hover:translate-x-1 transition-transform" />
-							</Button>
-						</Link>
-					</div>
-				</div>
-			</article>
-		</div>
-	);
+        {/* Title */}
+        <h1 className="text-5xl md:text-7xl font-light leading-[0.95] tracking-tight max-w-4xl">
+          {article.title}
+        </h1>
+
+        {/* Byline */}
+        {article.author ? (
+          <div className="mt-8 flex items-center gap-4 border-t border-b border-[#1a1a17]/15 py-5">
+            <div className="w-10 h-10 rounded-full bg-[#5a6a3a]/10 border border-[#5a6a3a]/30 flex items-center justify-center mono text-[11px] text-[#5a6a3a]">
+              {article.author
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </div>
+            <div className="flex flex-col">
+              <span className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/55">
+                Written by
+              </span>
+              <span className="text-base tracking-tight">{article.author}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-10 border-b border-[#1a1a17]/15" />
+        )}
+
+        {/* Featured image */}
+        {article.image ? (
+          <figure className="mt-12 border border-[#1a1a17]/15 bg-[#1a1a17]/[0.02] overflow-hidden group">
+            <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden">
+              <img
+                src={article.image}
+                alt={article.title}
+                loading="eager"
+                className="w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.02]"
+              />
+            </div>
+            <figcaption className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/55 px-5 py-3 border-t border-[#1a1a17]/15 flex items-center justify-between gap-4">
+              <span className="truncate">fig. 01 &mdash; {article.title}</span>
+              <span className="shrink-0">{formatted}</span>
+            </figcaption>
+          </figure>
+        ) : null}
+
+        {/* Body */}
+        <div
+          className="news-prose mt-16 max-w-3xl mx-auto"
+          dangerouslySetInnerHTML={{ __html: article.content }}
+        />
+
+        {/* Footer CTA */}
+        <div className="mt-24 border border-[#1a1a17]/15 p-10 md:p-12 text-center">
+          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-4">
+            Liked this?
+          </div>
+          <h3 className="text-3xl md:text-4xl font-light tracking-tight mb-4">
+            Let&rsquo;s <span className="italic text-[#5a6a3a]">talk</span> about your cloud.
+          </h3>
+          <p className="text-base leading-relaxed text-[#1a1a17]/70 max-w-xl mx-auto mb-8">
+            Our engineers can help you transform your multi-cloud infrastructure
+            &mdash; strategy, security, automation and FinOps.
+          </p>
+          <Link
+            href="/#contact"
+            className="mono text-[11px] tracking-[0.3em] uppercase bg-[#1a1a17] text-[#faf8f3] px-6 py-4 hover:bg-[#5a6a3a] transition-colors inline-flex items-center gap-2"
+          >
+            Talk to an expert <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+
+        {/* Prev / back nav */}
+        <div className="mt-14 flex justify-between items-center mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/45">
+          <Link
+            href="/#news"
+            className="hover:text-[#5a6a3a] transition-colors inline-flex items-center gap-2"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> All news
+          </Link>
+          <Link href="/" className="hover:text-[#5a6a3a] transition-colors">
+            Home →
+          </Link>
+        </div>
+      </article>
+
+      <style>{`
+        .news-prose p { font-size: 1.125rem; line-height: 1.85; color: rgba(26,26,23,0.82); margin: 0 0 1.4rem 0; }
+        .news-prose p:first-of-type { font-size: 1.35rem; font-style: italic; color: rgba(26,26,23,0.9); }
+        .news-prose p:first-of-type::first-letter { font-size: 4rem; line-height: 1; float: left; padding: 0.25rem 0.75rem 0 0; color: #5a6a3a; font-weight: 400; }
+        .news-prose h2 { font-size: 2rem; font-weight: 300; letter-spacing: -0.01em; margin: 3rem 0 1rem 0; color: #1a1a17; }
+        .news-prose h3 { font-size: 1.5rem; font-weight: 300; letter-spacing: -0.01em; margin: 2.5rem 0 0.75rem 0; color: #1a1a17; }
+        .news-prose a { color: #5a6a3a; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+        .news-prose a:hover { color: #1a1a17; }
+        .news-prose ul, .news-prose ol { padding-left: 1.5rem; margin: 1rem 0 1.4rem 0; }
+        .news-prose ul li, .news-prose ol li { margin-bottom: 0.5rem; line-height: 1.75; color: rgba(26,26,23,0.82); }
+        .news-prose ul { list-style: none; padding-left: 0; }
+        .news-prose ul li { position: relative; padding-left: 1.75rem; }
+        .news-prose ul li::before { content: "—"; position: absolute; left: 0; top: 0; color: #5a6a3a; font-family: "JetBrains Mono", ui-monospace, monospace; }
+        .news-prose blockquote { border-left: 2px solid #5a6a3a; padding: 0.25rem 0 0.25rem 1.5rem; margin: 2rem 0; font-style: italic; font-size: 1.35rem; line-height: 1.6; color: rgba(26,26,23,0.85); }
+        .news-prose code { font-family: "JetBrains Mono", ui-monospace, monospace; background: rgba(26,26,23,0.06); padding: 0.1rem 0.4rem; font-size: 0.9em; border-radius: 2px; }
+        .news-prose pre { background: #1a1a17; color: #faf8f3; padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; font-size: 0.9rem; line-height: 1.6; }
+        .news-prose pre code { background: transparent; color: inherit; padding: 0; }
+        .news-prose img { margin: 2rem 0; border: 1px solid rgba(26,26,23,0.15); width: 100%; height: auto; }
+        .news-prose hr { border: 0; border-top: 1px solid rgba(26,26,23,0.15); margin: 3rem 0; }
+        .news-prose strong { font-weight: 500; color: #1a1a17; }
+      `}</style>
+    </div>
+  );
 }

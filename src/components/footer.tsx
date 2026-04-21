@@ -1,167 +1,120 @@
-import { Button } from "@/components/ui/button";
-import { Cloud, Github, Linkedin, Twitter } from "lucide-react";
+"use client";
 
-import Image from "next/image";
+import { Github, Linkedin } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { useLocale } from "./locale-provider";
 
 export function Footer() {
-	return (
-		<footer className="bg-foreground text-background py-16">
-			<div className="container mx-auto px-4">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-					{/* Brand */}
-					<div className="space-y-4">
-						<div className="flex items-center gap-2">
-							<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-								<Cloud className="w-5 h-5 text-primary-foreground" />
-								<div className="flex items-center space-x-3">
-									<div className="w-8 h-8 relative">
-										<Image
-											src="/alamops-logo.svg"
-											alt="AlamOps"
-											fill
-											className="object-contain w-4xl bg-white"
-										/>
-									</div>
-								</div>
-							</div>
-							<span className="text-xl font-bold">Alamops</span>
-						</div>
-						<p className="text-background/70 leading-relaxed">
-							Transforming companies through innovative and secure multi-cloud
-							solutions.
-						</p>
-						<div className="flex gap-3">
-							{/* <Link href="https://twitter.com/alamops" passHref>
-								<Button
-									size="icon"
-									variant="ghost"
-									className="text-background/70 hover:text-background hover:bg-background/10"
-								>
-									<Twitter className="w-5 h-5" />
-								</Button>
-							</Link> */}
-							<Link href="https://www.linkedin.com/company/alamops/" passHref>
-								<Button
-									size="icon"
-									variant="ghost"
-									className="text-background/70 hover:text-background hover:bg-background/10"
-								>
-									<Linkedin className="w-5 h-5" />
-								</Button>
-							</Link>
+  const { t } = useLocale();
 
-							<Link href="https://github.com/AlamOps-Consulting" passHref>
-								<Button
-									size="icon"
-									variant="ghost"
-									className="text-background/70 hover:text-background hover:bg-background/10"
-								>
-									<Github className="w-5 h-5" />
-								</Button>
-							</Link>
-						</div>
-					</div>
+  return (
+    <footer className="landing bg-[#1a1a17] text-[#faf8f3] pt-20 pb-10">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-12">
+        <div className="grid md:grid-cols-12 gap-10 border-b border-[#faf8f3]/15 pb-12">
+          <div className="md:col-span-5">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3"
+              aria-label="AlamOps home"
+            >
+              <div className="relative w-10 h-10 bg-[#faf8f3] p-1.5">
+                <Image
+                  src="/alamops-logo.svg"
+                  alt="AlamOps logo"
+                  fill
+                  className="object-contain p-1"
+                />
+              </div>
+              <span className="text-4xl font-light tracking-tight leading-none">
+                Alam<span className="italic text-[#a8b872]">Ops.</span>
+              </span>
+            </Link>
+            <p className="mt-6 text-base leading-relaxed text-[#faf8f3]/65 max-w-sm">
+              {t.footer.tagline}
+            </p>
+            <div className="flex gap-4 mt-6">
+              <Link
+                href="https://www.linkedin.com/company/alamops/"
+                aria-label="LinkedIn"
+                className="text-[#faf8f3]/60 hover:text-[#a8b872] transition-colors"
+              >
+                <Linkedin className="w-5 h-5" />
+              </Link>
+              <Link
+                href="https://github.com/AlamOps-Consulting"
+                aria-label="GitHub"
+                className="text-[#faf8f3]/60 hover:text-[#a8b872] transition-colors"
+              >
+                <Github className="w-5 h-5" />
+              </Link>
+            </div>
+          </div>
 
-					{/* Services */}
-					<div>
-						<h3 className="font-semibold mb-4">Services</h3>
-						<ul className="space-y-3 text-background/70">
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									Multi-Cloud Strategy
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									Cloud Security
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									DevOps & Automation
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									FinOps
-								</a>
-							</li>
-						</ul>
-					</div>
+          <FooterCol
+            title={t.footer.cols.services}
+            links={[
+              { label: t.footer.links.multiCloud, href: "#services" },
+              { label: t.footer.links.security, href: "#services" },
+              { label: t.footer.links.devops, href: "#services" },
+              { label: t.footer.links.finops, href: "#services" },
+            ]}
+          />
+          <FooterCol
+            title={t.footer.cols.company}
+            links={[
+              { label: t.footer.links.about, href: "#hero" },
+              { label: t.footer.links.news, href: "#news" },
+            ]}
+          />
+          <FooterCol
+            title={t.footer.cols.legal}
+            links={[
+              { label: t.footer.links.privacy, href: "/privacy" },
+              { label: t.footer.links.terms, href: "/terms" },
+              {
+                label: t.footer.links.contact,
+                href: "https://calendly.com/ceo-alamops",
+              },
+            ]}
+          />
+        </div>
 
-					{/* Company */}
-					<div>
-						<h3 className="font-semibold mb-4">Enterprise</h3>
-						<ul className="space-y-3 text-background/70">
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									About us
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									Team
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									Carrers
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									News
-								</a>
-							</li>
-						</ul>
-					</div>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-8 mono text-[10px] tracking-[0.3em] uppercase text-[#faf8f3]/45">
+          <span>
+            © {new Date().getFullYear()} AlamOps. {t.footer.rights}
+          </span>
+          <span>{t.footer.madeWith}</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
-					{/* Legal */}
-					<div>
-						<h3 className="font-semibold mb-4">Legal</h3>
-						<ul className="space-y-3 text-background/70">
-							<li>
-								<a
-									href="/privacy"
-									className="hover:text-background transition-colors"
-								>
-									Privacy Policy
-								</a>
-							</li>
-							<li>
-								<a
-									href="/terms"
-									className="hover:text-background transition-colors"
-								>
-									Terms of Service
-								</a>
-							</li>
-							<li>
-								<a href="#" className="hover:text-background transition-colors">
-									Cookie Policy
-								</a>
-							</li>
-							<li>
-								<a
-									href="https://calendly.com/ceo-alamops"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="hover:text-background transition-colors"
-								>
-									Contact
-								</a>
-							</li>
-						</ul>
-					</div>
-				</div>
-
-				<div className="border-t border-background/20 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-					<p className="text-background/70 text-sm">
-						© {new Date().getFullYear()} AlamOps. All rights reserved.
-					</p>
-				</div>
-			</div>
-		</footer>
-	);
+function FooterCol({
+  title,
+  links,
+}: {
+  title: string;
+  links: { label: string; href: string }[];
+}) {
+  return (
+    <div className="md:col-span-2">
+      <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#a8b872] mb-5">
+        {title}
+      </div>
+      <ul className="space-y-3">
+        {links.map((l) => (
+          <li key={l.label}>
+            <a
+              href={l.href}
+              className="text-base tracking-tight text-[#faf8f3]/70 hover:text-[#faf8f3] hover:italic transition-colors"
+            >
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
