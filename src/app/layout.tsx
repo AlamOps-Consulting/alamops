@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     "Terraform",
     "Consultoría DevOps",
     "Consultoría cloud",
-    "Consultoría multi-cloud Madrid",
+    "Consultoría multi-cloud Zaragoza",
     "Servicios cloud España",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
@@ -125,7 +125,7 @@ const organizationJsonLd = {
   foundingDate: "2024",
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Madrid",
+    addressLocality: "Zaragoza",
     addressCountry: "ES",
   },
   areaServed: [

@@ -150,7 +150,7 @@ export default function TermsOfServicePage() {
       <LegalSection id="jurisdiction" num="08" title="Law & Jurisdiction">
         <p>These terms are governed by Spanish and European legislation.</p>
         <p>
-          For any conflict, the courts of Madrid, Spain will be competent,
+          For any conflict, the courts of Zaragoza, Spain will be competent,
           unless applicable regulations provide otherwise.
         </p>
       </LegalSection>

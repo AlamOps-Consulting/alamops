@@ -7,9 +7,10 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ArrowUpRight, X } from "lucide-react";
+import { ArrowUpRight, CalendarClock, X } from "lucide-react";
 import { API_URL } from "@/lib/utils";
 import { useLocale } from "./locale-provider";
+import type { Dict } from "@/lib/i18n";
 
 type ChatRole = "user" | "bot";
 
@@ -21,6 +22,27 @@ interface ChatMessage {
 }
 
 const SESSION_KEY = "alamops_chat_session";
+const CALENDLY_URL = "https://calendly.com/ceo-alamops";
+
+const CTA_TRIGGERS: RegExp[] = [
+  /hablar con un? especialista/i,
+  /llamada estrat[ée]gica/i,
+  /agendar(la|\s+(una\s+)?(llamada|cita|reuni[oó]n))/i,
+  /(book|schedule).*(call|meeting|session)/i,
+  /talk to (a|an) (specialist|expert)/i,
+  /strategy call/i,
+];
+
+function hasCallCta(text: string): boolean {
+  return CTA_TRIGGERS.some((re) => re.test(text));
+}
+
+function cleanCtaLine(text: string): string {
+  return text
+    .replace(/^\s*[·•\-*]?\s*(hablar con un? especialista|talk to (a|an) (specialist|expert))\s*[→>»]*\s*$/gim, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
 
 function genId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -250,7 +272,7 @@ export function ChatWidget() {
           <IntroBlock />
 
           {messages.map((m) => (
-            <MessageBlock key={m.id} msg={m} botLabel={t.chat.bot} youLabel={t.chat.you} />
+            <MessageBlock key={m.id} msg={m} t={t} />
           ))}
 
           {sending && <TypingBlock label={t.chat.bot} />}
@@ -325,16 +347,11 @@ function IntroBlock() {
   );
 }
 
-function MessageBlock({
-  msg,
-  botLabel,
-  youLabel,
-}: {
-  msg: ChatMessage;
-  botLabel: string;
-  youLabel: string;
-}) {
+function MessageBlock({ msg, t }: { msg: ChatMessage; t: Dict }) {
   const isUser = msg.role === "user";
+  const showCta = !isUser && hasCallCta(msg.text);
+  const body = showCta ? cleanCtaLine(msg.text) : msg.text;
+
   return (
     <div
       className={[
@@ -344,7 +361,7 @@ function MessageBlock({
     >
       <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/50 flex items-center gap-2">
         {!isUser && <span className="inline-block w-4 h-px bg-[#5a6a3a]" />}
-        <span>{isUser ? youLabel : botLabel}</span>
+        <span>{isUser ? t.chat.you : t.chat.bot}</span>
         {isUser && <span className="inline-block w-4 h-px bg-[#1a1a17]/40" />}
       </div>
       <div
@@ -355,8 +372,27 @@ function MessageBlock({
             : "border-l-2 border-[#5a6a3a] pl-4 pr-1 py-1",
         ].join(" ")}
       >
-        {msg.text}
+        {body}
       </div>
+      {showCta && (
+        <a
+          href={CALENDLY_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="alam-chat-cta mt-2 ml-[2px] inline-flex items-center gap-3 bg-[#5a6a3a] text-[#faf8f3] pl-4 pr-3 py-3 border border-[#5a6a3a] hover:bg-[#1a1a17] hover:border-[#1a1a17] transition-colors max-w-[88%]"
+        >
+          <CalendarClock className="w-4 h-4 shrink-0 stroke-[1.5]" aria-hidden />
+          <span className="flex flex-col items-start leading-tight">
+            <span className="mono text-[10px] tracking-[0.3em] uppercase">
+              {t.chat.cta.book}
+            </span>
+            <span className="text-[13px] tracking-tight opacity-85">
+              {t.chat.cta.bookHint}
+            </span>
+          </span>
+          <ArrowUpRight className="w-4 h-4 shrink-0 stroke-[1.5] ml-1" aria-hidden />
+        </a>
+      )}
     </div>
   );
 }
