@@ -175,7 +175,7 @@ export const dict = {
       values: {
         email: "support@alamops.com",
         phone: "+34 61 40 20 961",
-        office: "Madrid, España",
+        office: "Zaragoza, España",
       },
       urgentTitle: "Need help urgently?",
       urgentText: "Our on-call rotation handles critical incidents 24/7.",
@@ -232,6 +232,10 @@ export const dict = {
         rateLimit: "Too many messages. Try again in a minute.",
         offline: "Couldn't reach the server. Try again.",
         failed: "Something went wrong. Please retry.",
+      },
+      cta: {
+        book: "Book a call",
+        bookHint: "Free 30-min strategy session",
       },
     },
   },
@@ -385,7 +389,7 @@ export const dict = {
       values: {
         email: "support@alamops.com",
         phone: "+34 61 40 20 961",
-        office: "Madrid, España",
+        office: "Zaragoza, España",
       },
       urgentTitle: "¿Necesitas ayuda urgente?",
       urgentText:
@@ -443,6 +447,10 @@ export const dict = {
         rateLimit: "Demasiados mensajes. Inténtalo en un minuto.",
         offline: "No se pudo conectar al servidor. Inténtalo de nuevo.",
         failed: "Algo salió mal. Vuelve a intentarlo.",
+      },
+      cta: {
+        book: "Agendar llamada",
+        bookHint: "Sesión estratégica gratis de 30 min",
       },
     },
   },
