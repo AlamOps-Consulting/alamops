@@ -177,9 +177,10 @@ export const dict = {
         phone: "+34 61 40 20 961",
         office: "Zaragoza, España",
       },
-      urgentTitle: "Need help urgently?",
-      urgentText: "Our on-call rotation handles critical incidents 24/7.",
-      urgentCta: "Page on-call",
+      urgentTitle: "Book a call to assess your needs",
+      urgentText:
+        "Schedule a free consultation and let's see how we can help you.",
+      urgentCta: "Book a call",
       toast: {
         success: "Message sent.",
         successDesc: "We'll reply within 24 hours.",
@@ -391,10 +392,10 @@ export const dict = {
         phone: "+34 61 40 20 961",
         office: "Zaragoza, España",
       },
-      urgentTitle: "¿Necesitas ayuda urgente?",
+      urgentTitle: "Agenda una cita para valorar tus necesidades",
       urgentText:
-        "Nuestra guardia 24/7 atiende incidentes críticos en cualquier momento.",
-      urgentCta: "Llamar a guardia",
+        "Reserva una consulta gratuita y vemos cómo podemos ayudarte.",
+      urgentCta: "Reservar cita",
       toast: {
         success: "Mensaje enviado.",
         successDesc: "Te responderemos en 24 horas.",
