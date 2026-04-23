@@ -198,7 +198,9 @@ export function ContactSection() {
                 {t.contact.urgentText}
               </p>
               <a
-                href="mailto:support@alamops.com?subject=URGENT"
+                href="https://calendly.com/ceo-alamops"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mono text-[10px] tracking-[0.3em] uppercase border border-[#1a1a17]/30 px-4 py-2 hover:border-[#5a6a3a] hover:text-[#5a6a3a] transition-colors inline-block"
               >
                 {t.contact.urgentCta} →
