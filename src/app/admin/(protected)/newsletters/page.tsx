@@ -81,10 +81,10 @@ export default function AdminNewslettersPage() {
 
   const totalPages = data ? Math.ceil(data.total / data.per_page) : 1;
 
-  const filterTabs: { label: string; value: Filter; idx: string }[] = [
-    { label: "All", value: "all", idx: "01" },
-    { label: "Active", value: "active", idx: "02" },
-    { label: "Inactive", value: "inactive", idx: "03" },
+  const filterTabs: { label: string; value: Filter }[] = [
+    { label: "All", value: "all" },
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
   ];
 
   return (
@@ -92,9 +92,6 @@ export default function AdminNewslettersPage() {
       {/* Header */}
       <div className="flex items-end justify-between mb-14 pb-6 border-b border-[#1a1a17]/15">
         <div>
-          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-3">
-            / 02 &nbsp; Audience
-          </div>
           <h2 className="text-5xl font-light tracking-tight">
             Newsletter <span className="italic text-[#5a6a3a]">subscribers.</span>
           </h2>
@@ -143,7 +140,7 @@ export default function AdminNewslettersPage() {
         <span className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/40">
           Filter
         </span>
-        {filterTabs.map(({ label, value, idx }) => {
+        {filterTabs.map(({ label, value }) => {
           const active = filter === value;
           return (
             <button
@@ -151,23 +148,14 @@ export default function AdminNewslettersPage() {
               onClick={() => handleFilterChange(value)}
               className="group relative py-2"
             >
-              <span className="inline-flex items-baseline gap-2">
-                <span
-                  className={`mono text-[10px] tracking-[0.25em] ${
-                    active ? "text-[#5a6a3a]" : "text-[#1a1a17]/30"
-                  }`}
-                >
-                  {idx}
-                </span>
-                <span
-                  className={`text-sm tracking-tight transition-colors ${
-                    active
-                      ? "text-[#5a6a3a] italic"
-                      : "text-[#1a1a17]/70 group-hover:text-[#1a1a17]"
-                  }`}
-                >
-                  {label}
-                </span>
+              <span
+                className={`text-sm tracking-tight transition-colors ${
+                  active
+                    ? "text-[#5a6a3a] italic"
+                    : "text-[#1a1a17]/70 group-hover:text-[#1a1a17]"
+                }`}
+              >
+                {label}
               </span>
               <span
                 className={`absolute left-0 -bottom-0 h-px transition-all ${
