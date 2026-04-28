@@ -5,8 +5,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
 const navItems = [
-  { label: "News", href: "/admin/news", index: "01" },
-  { label: "Newsletters", href: "/admin/newsletters", index: "02" },
+  { label: "News", href: "/admin/news" },
+  { label: "Newsletters", href: "/admin/newsletters" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -50,28 +50,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/40 mb-4">
               Sections
             </div>
-            {navItems.map(({ label, href, index }) => {
+            {navItems.map(({ label, href }) => {
               const active = pathname === href || pathname.startsWith(href + "/");
               return (
                 <Link key={href} href={href} className="group block py-3">
-                  <div className="flex items-baseline justify-between">
-                    <span
-                      className={`text-lg tracking-tight transition-colors ${
-                        active
-                          ? "text-[#5a6a3a] italic"
-                          : "text-[#1a1a17]/80 group-hover:text-[#1a1a17]"
-                      }`}
-                    >
-                      {label}
-                    </span>
-                    <span
-                      className={`mono text-[10px] tracking-[0.25em] transition-colors ${
-                        active ? "text-[#5a6a3a]" : "text-[#1a1a17]/30"
-                      }`}
-                    >
-                      {index}
-                    </span>
-                  </div>
+                  <span
+                    className={`text-lg tracking-tight transition-colors ${
+                      active
+                        ? "text-[#5a6a3a] italic"
+                        : "text-[#1a1a17]/80 group-hover:text-[#1a1a17]"
+                    }`}
+                  >
+                    {label}
+                  </span>
                   <div
                     className={`mt-2 h-px transition-all ${
                       active ? "bg-[#5a6a3a]" : "bg-[#1a1a17]/10 group-hover:bg-[#1a1a17]/30"
