@@ -64,9 +64,6 @@ export default function AdminNewsPage() {
       {/* Header */}
       <div className="flex items-end justify-between mb-14 pb-6 border-b border-[#1a1a17]/15">
         <div>
-          <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a] mb-3">
-            / 01 &nbsp; Catalogue
-          </div>
           <h2 className="text-5xl font-light tracking-tight">
             News <span className="italic text-[#5a6a3a]">articles.</span>
           </h2>
