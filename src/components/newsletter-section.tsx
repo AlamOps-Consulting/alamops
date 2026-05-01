@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { API_URL } from "@/lib/utils";
 import { useLocale } from "./locale-provider";
 
+function deriveNameFromEmail(email: string): string {
+  const local = email.split("@")[0] ?? "";
+  const cleaned = local.replace(/[._\-+]+/g, " ").trim();
+  if (!cleaned) return "";
+  return cleaned
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function NewsletterSection() {
   const { t } = useLocale();
   const [email, setEmail] = useState("");
@@ -15,10 +25,11 @@ export function NewsletterSection() {
     e.preventDefault();
     setSending(true);
     try {
+      const name = deriveNameFromEmail(email);
       const response = await fetch(`${API_URL}/newsletter/subscribe`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, name }),
       });
       if (response.status === 201) {
         toast.success(t.newsletter.toast.success, {
