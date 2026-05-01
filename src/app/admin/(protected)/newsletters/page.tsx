@@ -1,8 +1,14 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
-import { listSubscribers, addSubscriber, unsubscribeSubscriber } from "@/lib/admin-api";
+import {
+  listSubscribers,
+  addSubscriber,
+  unsubscribeSubscriber,
+  bulkUnsubscribe,
+  resubscribeSubscriber,
+} from "@/lib/admin-api";
 
 interface Subscriber {
   _id: string;
@@ -28,6 +34,13 @@ export default function AdminNewslettersPage() {
   const [addEmail, setAddEmail] = useState("");
   const [addingEmail, setAddingEmail] = useState(false);
   const [unsubscribingId, setUnsubscribingId] = useState<string | null>(null);
+  const [resubscribingId, setResubscribingId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
+  const LONG_PRESS_MS = 500;
 
   const fetchSubscribers = useCallback(async () => {
     setLoading(true);
@@ -46,9 +59,110 @@ export default function AdminNewslettersPage() {
     fetchSubscribers();
   }, [fetchSubscribers]);
 
+  useEffect(() => {
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  }, [page, filter]);
+
+  const exitSelectMode = useCallback(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  function startLongPress(sub: Subscriber) {
+    if (!sub.active) return;
+    longPressTriggered.current = false;
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      setSelectMode(true);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.add(sub._id);
+        return next;
+      });
+    }, LONG_PRESS_MS);
+  }
+
+  function cancelLongPress() {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  }
+
+  function handleRowTap(sub: Subscriber) {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false;
+      return;
+    }
+    if (!selectMode || !sub.active) return;
+    toggleOne(sub._id);
+  }
+
+  const activeRowsOnPage = useMemo(
+    () => (data?.items ?? []).filter((s) => s.active),
+    [data]
+  );
+
+  const allActiveSelected =
+    activeRowsOnPage.length > 0 &&
+    activeRowsOnPage.every((s) => selectedIds.has(s._id));
+
+  function toggleOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAllActive() {
+    setSelectedIds((prev) => {
+      if (allActiveSelected) {
+        const next = new Set(prev);
+        activeRowsOnPage.forEach((s) => next.delete(s._id));
+        return next;
+      }
+      const next = new Set(prev);
+      activeRowsOnPage.forEach((s) => next.add(s._id));
+      return next;
+    });
+  }
+
   function handleFilterChange(f: Filter) {
     setFilter(f);
     setPage(1);
+  }
+
+  async function handleBulkUnsubscribe() {
+    const ids = Array.from(selectedIds);
+    if (!ids.length) return;
+    setBulkRunning(true);
+    try {
+      const res = await bulkUnsubscribe(ids);
+      toast.success(`${res.unsubscribed} unsubscribed`);
+      setSelectedIds(new Set());
+      fetchSubscribers();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to bulk unsubscribe");
+    } finally {
+      setBulkRunning(false);
+    }
+  }
+
+  async function handleResubscribe(sub: Subscriber) {
+    setResubscribingId(sub._id);
+    try {
+      await resubscribeSubscriber(sub.email);
+      toast.success(`${sub.email} resubscribed`);
+      fetchSubscribers();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to resubscribe");
+    } finally {
+      setResubscribingId(null);
+    }
   }
 
   async function handleAddEmail(e: React.FormEvent) {
@@ -167,6 +281,47 @@ export default function AdminNewslettersPage() {
         })}
       </div>
 
+      {/* Select mode action bar */}
+      {selectMode && (
+        <div className="flex items-center justify-between mb-6 px-5 py-4 border border-[#5a6a3a]/40 bg-[#5a6a3a]/[0.06]">
+          <div className="flex items-baseline gap-4">
+            <span className="mono text-[10px] tracking-[0.3em] uppercase text-[#5a6a3a]">
+              ◉ select mode
+            </span>
+            <span className="mono text-[11px] tracking-[0.25em] uppercase text-[#1a1a17]/70">
+              {selectedIds.size} selected
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={toggleAllActive}
+              className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/60 hover:text-[#1a1a17] transition-colors"
+            >
+              {allActiveSelected ? "Deselect page" : "Select page"}
+            </button>
+            <button
+              onClick={exitSelectMode}
+              className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/60 hover:text-[#1a1a17] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              disabled={bulkRunning || selectedIds.size === 0}
+              onClick={handleBulkUnsubscribe}
+              className="mono text-[11px] tracking-[0.3em] uppercase bg-[#1a1a17] text-[#faf8f3] px-6 py-3 hover:bg-[#a33] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {bulkRunning ? "Unsubscribing…" : `Unsubscribe selected →`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!selectMode && (
+        <p className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/35 mb-6">
+          ╱ hold an email to enter select mode
+        </p>
+      )}
+
       {loading ? (
         <p className="mono text-[11px] tracking-[0.25em] uppercase text-[#1a1a17]/50">
           Loading…
@@ -176,20 +331,60 @@ export default function AdminNewslettersPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[#1a1a17]/15">
-                <Th width="50%">Email</Th>
-                <Th width="25%">Subscribed</Th>
-                <Th width="15%">Status</Th>
-                <Th width="10%" align="right">
+                {selectMode && (
+                  <th className="w-10 pb-4 pr-2">
+                    <input
+                      type="checkbox"
+                      aria-label="Select all active on page"
+                      checked={allActiveSelected}
+                      onChange={toggleAllActive}
+                      disabled={activeRowsOnPage.length === 0}
+                      className="accent-[#5a6a3a] cursor-pointer disabled:cursor-not-allowed"
+                    />
+                  </th>
+                )}
+                <Th width={selectMode ? "42%" : "50%"}>Email</Th>
+                <Th width="22%">Subscribed</Th>
+                <Th width="13%">Status</Th>
+                <Th width={selectMode ? "18%" : "15%"} align="right">
                   &nbsp;
                 </Th>
               </tr>
             </thead>
             <tbody>
-              {(data?.items ?? []).map((sub, idx) => (
+              {(data?.items ?? []).map((sub, idx) => {
+                const isSelected = selectedIds.has(sub._id);
+                return (
                 <tr
                   key={sub._id}
-                  className="border-b border-[#1a1a17]/10 hover:bg-[#1a1a17]/[0.03] transition-colors"
+                  onPointerDown={() => startLongPress(sub)}
+                  onPointerUp={cancelLongPress}
+                  onPointerLeave={cancelLongPress}
+                  onPointerCancel={cancelLongPress}
+                  onContextMenu={(e) => {
+                    if (selectMode || sub.active) e.preventDefault();
+                  }}
+                  onClick={() => handleRowTap(sub)}
+                  className={`border-b border-[#1a1a17]/10 transition-colors ${
+                    isSelected
+                      ? "bg-[#5a6a3a]/[0.08]"
+                      : "hover:bg-[#1a1a17]/[0.03]"
+                  } ${selectMode && sub.active ? "cursor-pointer" : ""} select-none`}
+                  style={{ touchAction: "manipulation" }}
                 >
+                  {selectMode && (
+                    <td className="py-5 pr-2 align-middle">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ${sub.email}`}
+                        checked={isSelected}
+                        onChange={() => toggleOne(sub._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        disabled={!sub.active}
+                        className="accent-[#5a6a3a] cursor-pointer disabled:cursor-not-allowed disabled:opacity-30"
+                      />
+                    </td>
+                  )}
                   <td className="py-5 pr-4">
                     <div className="flex items-baseline gap-4">
                       <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/30 w-8">
@@ -230,22 +425,37 @@ export default function AdminNewslettersPage() {
                     </span>
                   </td>
                   <td className="py-5 text-right">
-                    {sub.active && (
+                    {sub.active ? (
                       <button
-                        disabled={unsubscribingId === sub._id}
-                        onClick={() => handleUnsubscribe(sub)}
+                        disabled={unsubscribingId === sub._id || selectMode}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUnsubscribe(sub);
+                        }}
                         className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#a33] transition-colors disabled:opacity-40"
                       >
                         {unsubscribingId === sub._id ? "…" : "Unsubscribe"}
                       </button>
+                    ) : (
+                      <button
+                        disabled={resubscribingId === sub._id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleResubscribe(sub);
+                        }}
+                        className="mono text-[10px] tracking-[0.25em] uppercase text-[#1a1a17]/70 hover:text-[#5a6a3a] transition-colors disabled:opacity-40"
+                      >
+                        {resubscribingId === sub._id ? "…" : "↺ Resubscribe"}
+                      </button>
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
               {(data?.items ?? []).length === 0 && (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={selectMode ? 5 : 4}
                     className="py-20 text-center mono text-[11px] tracking-[0.3em] uppercase text-[#1a1a17]/40"
                   >
                     ╱╱ no subscribers found
