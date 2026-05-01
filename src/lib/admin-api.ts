@@ -113,3 +113,29 @@ export async function unsubscribeSubscriber(email: string) {
   }
   return res.json();
 }
+
+export async function bulkUnsubscribe(ids: string[]) {
+  const res = await apiFetch("/newsletter/unsubscribe-bulk", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ids }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Failed to bulk unsubscribe");
+  }
+  return res.json() as Promise<{ unsubscribed: number; not_found: string[] }>;
+}
+
+export async function resubscribeSubscriber(email: string) {
+  const res = await apiFetch("/newsletter/subscribe", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? "Failed to resubscribe");
+  }
+  return res.json();
+}
