@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 const navItems = [
   { label: "News", href: "/admin/news" },
   { label: "Newsletters", href: "/admin/newsletters" },
+  { label: "Status", href: "/admin/status" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
