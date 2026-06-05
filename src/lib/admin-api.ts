@@ -80,16 +80,23 @@ export async function deleteNews(id: string) {
 
 // ── Newsletter ───────────────────────────────────────────────────────────────
 
-export async function listSubscribers(page = 1, perPage = 20, active?: boolean) {
+export async function listSubscribers(
+  page = 1,
+  perPage = 20,
+  active?: boolean,
+  q?: string
+) {
   let url = `/newsletter/subscribers?page=${page}&per_page=${perPage}`;
   if (active !== undefined) url += `&active=${active}`;
+  if (q && q.trim()) url += `&q=${encodeURIComponent(q.trim())}`;
   const res = await apiFetch(url);
   if (!res.ok) throw new Error("Failed to fetch subscribers");
   return res.json();
 }
 
+// Admin direct-add (no double opt-in) — hits the authenticated POST endpoint.
 export async function addSubscriber(email: string) {
-  const res = await apiFetch("/newsletter/subscribe", {
+  const res = await apiFetch("/newsletter/subscribers", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
@@ -128,7 +135,8 @@ export async function bulkUnsubscribe(ids: string[]) {
 }
 
 export async function resubscribeSubscriber(email: string) {
-  const res = await apiFetch("/newsletter/subscribe", {
+  // Admin reactivation goes through the authenticated add endpoint (no opt-in).
+  const res = await apiFetch("/newsletter/subscribers", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email }),
