@@ -30,6 +30,8 @@ export default function AdminNewslettersPage() {
   const [data, setData] = useState<SubscribersResponse | null>(null);
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<Filter>("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [addEmail, setAddEmail] = useState("");
   const [addingEmail, setAddingEmail] = useState(false);
@@ -46,23 +48,32 @@ export default function AdminNewslettersPage() {
     setLoading(true);
     try {
       const active = filter === "all" ? undefined : filter === "active";
-      const res = await listSubscribers(page, 20, active);
+      const res = await listSubscribers(page, 20, active, debouncedSearch);
       setData(res);
     } catch {
       toast.error("Failed to load subscribers");
     } finally {
       setLoading(false);
     }
-  }, [page, filter]);
+  }, [page, filter, debouncedSearch]);
 
   useEffect(() => {
     fetchSubscribers();
   }, [fetchSubscribers]);
 
+  // Debounce the email search box (300ms) and reset to page 1 on change.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [search]);
+
   useEffect(() => {
     setSelectedIds(new Set());
     setSelectMode(false);
-  }, [page, filter]);
+  }, [page, filter, debouncedSearch]);
 
   const exitSelectMode = useCallback(() => {
     setSelectMode(false);
@@ -250,7 +261,7 @@ export default function AdminNewslettersPage() {
       </form>
 
       {/* Filters */}
-      <div className="flex items-center gap-8 mb-8">
+      <div className="flex flex-wrap items-center gap-8 mb-8">
         <span className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/40">
           Filter
         </span>
@@ -279,6 +290,31 @@ export default function AdminNewslettersPage() {
             </button>
           );
         })}
+
+        {/* Email search — sits beside the status tabs */}
+        <div className="relative ml-auto flex items-center">
+          <span className="mono text-[10px] tracking-[0.2em] text-[#1a1a17]/30 mr-3">
+            ⌕
+          </span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search email…"
+            aria-label="Search subscribers by email"
+            className="w-56 bg-transparent border-0 border-b border-[#1a1a17]/30 pb-1 mono text-[12px] tracking-tight focus:outline-none focus:border-[#5a6a3a] transition-colors placeholder:text-[#1a1a17]/30"
+            style={{ fontFamily: "inherit" }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              className="ml-2 mono text-[11px] text-[#1a1a17]/40 hover:text-[#a33] transition-colors"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Select mode action bar */}
