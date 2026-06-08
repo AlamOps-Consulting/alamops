@@ -31,7 +31,12 @@ export function NewsletterSection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name }),
       });
-      if (response.status === 201) {
+      if (response.status === 202) {
+        toast.success(t.newsletter.toast.confirm, {
+          description: t.newsletter.toast.confirmDesc,
+        });
+        setEmail("");
+      } else if (response.status === 201) {
         toast.success(t.newsletter.toast.success, {
           description: t.newsletter.toast.successDesc,
         });

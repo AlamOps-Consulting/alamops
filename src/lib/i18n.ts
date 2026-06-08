@@ -139,6 +139,8 @@ export const dict = {
       toast: {
         success: "Thanks for subscribing.",
         successDesc: "You'll receive our latest updates.",
+        confirm: "Almost there — check your inbox.",
+        confirmDesc: "We sent you a confirmation link. Click it to finish subscribing.",
         already: "You're already subscribed.",
         invalid: "Invalid email.",
         fail: "Something went wrong. Try again later.",
@@ -427,6 +429,8 @@ export const dict = {
       toast: {
         success: "¡Gracias por suscribirte!",
         successDesc: "Recibirás nuestras últimas novedades.",
+        confirm: "Casi listo — revisa tu correo.",
+        confirmDesc: "Te enviamos un enlace de confirmación. Haz clic para terminar de suscribirte.",
         already: "Ya estás suscrito.",
         invalid: "Correo inválido.",
         fail: "Algo salió mal. Inténtalo más tarde.",
