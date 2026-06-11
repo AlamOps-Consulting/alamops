@@ -4,14 +4,15 @@ import {
   ArrowRight,
   Star,
   Play,
-  PlayCircle,
   Volume2,
   VolumeX,
   Linkedin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import aiGeneratedImg from "@/assets/features/ai-generated.png";
 import multiCloudImg from "@/assets/features/multi-cloud.png";
 import visualizerImg from "@/assets/features/visualizer.png";
@@ -103,6 +104,52 @@ const productFeatures: ProductFeature[] = [
   },
 ];
 
+const S3_VIDEOS = "https://alamops-news-images.s3.amazonaws.com/videos";
+
+const productVideos: {
+  src: string;
+  poster?: string;
+  tag: Record<Locale, string>;
+  title: Record<Locale, string>;
+}[] = [
+  {
+    src: `${S3_VIDEOS}/diagrams.mp4`,
+    poster: `${S3_VIDEOS}/diagrams.jpg`,
+    tag: { en: "01 — Diagrams", es: "01 — Diagramas" },
+    title: {
+      en: "Design your cloud architecture visually",
+      es: "Diseña tu arquitectura cloud visualmente",
+    },
+  },
+  {
+    src: `${S3_VIDEOS}/template.mp4`,
+    poster: `${S3_VIDEOS}/template.jpg`,
+    tag: { en: "02 — Templates", es: "02 — Plantillas" },
+    title: {
+      en: "Launch faster with ready-made templates",
+      es: "Lanza más rápido con plantillas listas",
+    },
+  },
+  {
+    src: `${S3_VIDEOS}/integrations.mp4`,
+    poster: `${S3_VIDEOS}/integrations.jpg`,
+    tag: { en: "03 — Integrations", es: "03 — Integraciones" },
+    title: {
+      en: "Connect every tool in your stack",
+      es: "Conecta cada herramienta de tu stack",
+    },
+  },
+  {
+    src: `${S3_VIDEOS}/Watch.mp4`,
+    poster: `${S3_VIDEOS}/Watch.jpg`,
+    tag: { en: "04 — Monitoring", es: "04 — Monitoreo" },
+    title: {
+      en: "Watch your infrastructure in real time",
+      es: "Vigila tu infraestructura en tiempo real",
+    },
+  },
+];
+
 const testimonials: {
   name: string;
   role: Record<Locale, string>;
@@ -153,7 +200,49 @@ export function ProductSection() {
   const { t, locale } = useLocale();
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [activeVideo, setActiveVideo] = useState(0);
+  const [anim, setAnim] = useState<"in" | "out">("in");
+  const [direction, setDirection] = useState<1 | -1>(1);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const swapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const figureRef = useRef<HTMLElement>(null);
+  const [warm, setWarm] = useState(false);
+
+  const n = productVideos.length;
+  const current = productVideos[activeVideo];
+  const prevVideo = productVideos[(activeVideo - 1 + n) % n];
+  const nextVideo = productVideos[(activeVideo + 1) % n];
+
+  // warm all clips into the browser cache once the carousel scrolls into view,
+  // so switching between them is instant (lazy — no cost for visitors who never reach it)
+  useEffect(() => {
+    if (warm || !figureRef.current) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setWarm(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    io.observe(figureRef.current);
+    return () => io.disconnect();
+  }, [warm]);
+
+  // fade/slide the new clip in once the index changes
+  useEffect(() => {
+    setAnim("out");
+    const id = setTimeout(() => setAnim("in"), 20);
+    return () => clearTimeout(id);
+  }, [activeVideo]);
+
+  useEffect(
+    () => () => {
+      if (swapTimer.current) clearTimeout(swapTimer.current);
+    },
+    [],
+  );
 
   const toggleVideo = () => {
     if (!videoRef.current) return;
@@ -166,6 +255,17 @@ export function ProductSection() {
     if (!videoRef.current) return;
     videoRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
+  };
+
+  const goToVideo = (i: number) => {
+    const next = (i + productVideos.length) % productVideos.length;
+    if (next === activeVideo) return;
+    if (swapTimer.current) clearTimeout(swapTimer.current);
+    if (videoRef.current) videoRef.current.pause();
+    setIsVideoPlaying(false);
+    setDirection(next > activeVideo ? 1 : -1);
+    setAnim("out"); // fade/slide current clip out, then swap
+    swapTimer.current = setTimeout(() => setActiveVideo(next), 220);
   };
 
   return (
@@ -211,60 +311,177 @@ export function ProductSection() {
           </div>
         </div>
 
-        {/* Video */}
-        <figure className="relative group overflow-hidden border border-[#1a1a17]/15 bg-[#1a1a17]/5 mb-28">
-          <video
-            ref={videoRef}
-            className="w-full aspect-video object-cover"
-            poster="/image-example.png"
-            src="/videos/product-demo.mp4"
-            muted={isMuted}
-            loop
-            playsInline
-            onPlay={() => setIsVideoPlaying(true)}
-            onPause={() => setIsVideoPlaying(false)}
-          />
-          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-            <button
-              onClick={toggleVideo}
-              className="w-16 h-16 rounded-full bg-[#faf8f3] text-[#1a1a17] flex items-center justify-center hover:bg-[#5a6a3a] hover:text-[#faf8f3] transition-colors"
-              aria-label="Play / Pause"
-            >
-              {isVideoPlaying ? (
-                <div className="w-3 h-3 bg-current" />
-              ) : (
-                <Play className="w-6 h-6 ml-0.5" />
-              )}
-            </button>
-            <button
-              onClick={toggleMute}
-              className="w-12 h-12 rounded-full bg-[#faf8f3] text-[#1a1a17] flex items-center justify-center hover:bg-[#5a6a3a] hover:text-[#faf8f3] transition-colors"
-              aria-label="Mute / Unmute"
-            >
-              {isMuted ? (
-                <VolumeX className="w-4 h-4" />
-              ) : (
-                <Volume2 className="w-4 h-4" />
-              )}
-            </button>
-          </div>
-          {!isVideoPlaying && (
-            <button
-              onClick={toggleVideo}
-              className="absolute inset-0 flex items-center justify-center bg-black/15 text-[#faf8f3]"
-              aria-label="Play"
-            >
-              <span className="w-20 h-20 rounded-full bg-[#faf8f3] text-[#1a1a17] flex items-center justify-center hover:scale-105 transition-transform">
-                <Play className="w-7 h-7 ml-1" />
+        {/* Video carousel — coverflow */}
+        <figure
+          ref={figureRef}
+          className="relative group mb-28 -mx-6 md:-mx-12 px-6 md:px-12 py-16 md:py-20 overflow-hidden bg-gradient-to-b from-[#1a1a17] via-[#1f1f1a] to-[#14140f]"
+        >
+          {/* warm the other clips into cache once in view */}
+          {warm &&
+            productVideos.map((v, i) =>
+              i === activeVideo ? null : (
+                <video
+                  key={`warm-${v.src}`}
+                  src={v.src}
+                  poster={v.poster}
+                  preload="auto"
+                  muted
+                  playsInline
+                  className="hidden"
+                  aria-hidden
+                />
+              ),
+            )}
+
+          {/* Heading */}
+          <div className="text-center mb-12">
+            <h3 className="text-3xl md:text-5xl font-light tracking-tight text-[#faf8f3]">
+              {locale === "es" ? "Mira IaC Design " : "See IaC Design "}
+              <span className="italic text-[#a3b16a]">
+                {locale === "es" ? "en acción" : "in action"}
               </span>
-            </button>
+            </h3>
+          </div>
+
+          {/* Stage */}
+          <div className="relative max-w-[1100px] mx-auto flex items-center justify-center">
+            {/* left peek */}
+            {productVideos.length > 1 && (
+              <button
+                onClick={() => goToVideo(activeVideo - 1)}
+                aria-label="Previous video"
+                tabIndex={-1}
+                className="hidden md:block shrink-0 w-[40%] -mr-[22%] z-0 rounded-2xl overflow-hidden ring-1 ring-white/10 opacity-50 blur-[1px] scale-95 transition-all hover:opacity-70"
+              >
+                <video
+                  src={`${prevVideo.src}#t=0.1`}
+                  poster={prevVideo.poster}
+                  preload="auto"
+                  muted
+                  playsInline
+                  className="w-full aspect-video object-cover bg-[#0d0d0c]"
+                />
+              </button>
+            )}
+
+            {/* center card */}
+            <div
+              style={{
+                transform:
+                  anim === "out"
+                    ? `translateX(${direction * 24}px) scale(0.98)`
+                    : "translateX(0) scale(1)",
+              }}
+              className={`relative z-20 w-full md:w-[64%] shrink-0 rounded-2xl overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-white/10 transition-[opacity,transform] duration-300 ease-out ${
+                anim === "out" ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <video
+                key={current.src}
+                ref={videoRef}
+                className="w-full aspect-video object-cover bg-[#0d0d0c]"
+                src={`${current.src}#t=0.1`}
+                poster={current.poster}
+                preload="auto"
+                muted={isMuted}
+                loop
+                playsInline
+                onPlay={() => setIsVideoPlaying(true)}
+                onPause={() => setIsVideoPlaying(false)}
+              />
+
+              {/* bottom gradient + tag/title overlay */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent" />
+              <div className="absolute left-6 bottom-6 right-6 text-left">
+                <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#a3b16a] mb-2">
+                  {current.tag[locale]}
+                </div>
+                <div className="text-lg md:text-2xl font-medium text-white tracking-tight">
+                  {current.title[locale]}
+                </div>
+              </div>
+
+              {/* center play / mute */}
+              <div className="absolute inset-0 flex items-center justify-center gap-4">
+                <button
+                  onClick={toggleVideo}
+                  className="w-16 h-16 rounded-full bg-black/45 backdrop-blur-sm ring-1 ring-white/50 text-white flex items-center justify-center hover:bg-black/65 transition-colors"
+                  aria-label="Play / Pause"
+                >
+                  {isVideoPlaying ? (
+                    <div className="w-3.5 h-3.5 bg-current" />
+                  ) : (
+                    <Play className="w-6 h-6 ml-0.5" />
+                  )}
+                </button>
+                <button
+                  onClick={toggleMute}
+                  className="opacity-0 group-hover:opacity-100 w-12 h-12 rounded-full bg-black/45 backdrop-blur-sm ring-1 ring-white/50 text-white flex items-center justify-center hover:bg-black/65 transition-all"
+                  aria-label="Mute / Unmute"
+                >
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* right peek */}
+            {productVideos.length > 1 && (
+              <button
+                onClick={() => goToVideo(activeVideo + 1)}
+                aria-label="Next video"
+                tabIndex={-1}
+                className="hidden md:block shrink-0 w-[40%] -ml-[22%] z-0 rounded-2xl overflow-hidden ring-1 ring-white/10 opacity-50 blur-[1px] scale-95 transition-all hover:opacity-70"
+              >
+                <video
+                  src={`${nextVideo.src}#t=0.1`}
+                  poster={nextVideo.poster}
+                  preload="auto"
+                  muted
+                  playsInline
+                  className="w-full aspect-video object-cover bg-[#0d0d0c]"
+                />
+              </button>
+            )}
+          </div>
+
+          {/* Nav: arrows + progress */}
+          {productVideos.length > 1 && (
+            <div className="flex items-center justify-center gap-6 mt-10">
+              <button
+                onClick={() => goToVideo(activeVideo - 1)}
+                className="w-11 h-11 rounded-full bg-white/10 ring-1 ring-white/25 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                aria-label="Previous video"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2">
+                {productVideos.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => goToVideo(i)}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === activeVideo
+                        ? "w-8 bg-[#a3b16a]"
+                        : "w-1.5 bg-white/30 hover:bg-white/60"
+                    }`}
+                    aria-label={`Go to video ${i + 1}`}
+                    aria-current={i === activeVideo}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => goToVideo(activeVideo + 1)}
+                className="w-11 h-11 rounded-full bg-white/10 ring-1 ring-white/25 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                aria-label="Next video"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
           )}
-          <figcaption className="flex items-center justify-between px-6 py-4 mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/60 border-t border-[#1a1a17]/10 bg-[#faf8f3]">
-            <span className="flex items-center gap-2">
-              <PlayCircle className="w-3.5 h-3.5" /> {t.product.videoCaption}
-            </span>
-            <span>{t.product.videoFig}</span>
-          </figcaption>
         </figure>
 
         {/* Features */}
