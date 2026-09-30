@@ -36,6 +36,11 @@ describe("normalizeArticles", () => {
 
   it("builds a relative image route for bare filenames", () => {
     const [article] = normalizeArticles([{ slug: "image", image: "image.png" }]);
-    expect(article.image).toBe("/news/image/image.png");
+    const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/$/, "");
+    const expected = apiBase
+      ? `${apiBase}/news/image/image.png`
+      : "/news/image/image.png";
+
+    expect(article.image).toBe(expected);
   });
 });
