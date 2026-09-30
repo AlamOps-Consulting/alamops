@@ -2,7 +2,6 @@
 "use client";
 
 import React from "react";
-import dynamic from "next/dynamic";
 import * as LucideIcons from "lucide-react";
 
 type Props = {
@@ -49,27 +48,11 @@ export default function IconRenderer({ icon, className, size = 16 }: Props) {
 	const name = toPascal(icon);
 
 	// 1) intento de componente ya cargado en el bundle
-	const StaticIcon = (LucideIcons as any)[name];
-	if (StaticIcon) {
-		const Comp = StaticIcon as React.ComponentType<any>;
-		return <Comp className={className} size={size} />;
+	const StaticIcon = (LucideIcons as unknown as Record<string, unknown>)[name];
+	if (typeof StaticIcon === "function") {
+		const Component = StaticIcon as React.ComponentType<IconProps>;
+		return <Component className={className} size={size} />;
 	}
 
-	// 2) fallback dinámico (no-SSR) — intenta cargar el icon por nombre desde lucide-react
-	//    dynamic(() => import(...).then(mod => mod[name]))
-	//    Nota: el nombre debe existir en el paquete; si no existe dará error en runtime.
-	const DynamicComp = dynamic<IconProps>(
-		async () => {
-			const mod = await import("lucide-react");
-			const C = (mod as any)[name];
-			if (!C) {
-				// si no existe, devolvemos un fallback simple que muestra el nombre
-				return () => <span className={className}>{icon}</span>;
-			}
-			return C;
-		},
-		{ ssr: false }
-	);
-
-	return <DynamicComp className={className} size={size} />;
+	return <span className={className}>{icon}</span>;
 }

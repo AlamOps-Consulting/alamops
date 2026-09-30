@@ -2,7 +2,7 @@ import React from "react";
 import { cookies, headers } from "next/headers";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { LocaleProvider } from "@/components/locale-provider";
 import { ChatWidgetMount } from "@/components/chat-widget-mount";
@@ -58,10 +58,6 @@ export const metadata: Metadata = {
       "es-ES": "/",
     },
   },
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf8f3" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1a17" },
-  ],
   openGraph: {
     title: `AlamOps — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
@@ -109,6 +105,13 @@ export const metadata: Metadata = {
     telephone: false,
     address: false,
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf8f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1a17" },
+  ],
 };
 
 const organizationJsonLd = {

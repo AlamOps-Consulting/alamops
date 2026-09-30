@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <aside className="w-64 shrink-0 flex flex-col border-r border-[#1a1a17]/15 px-8 py-10">
           <div className="mb-14">
             <div className="mono text-[10px] tracking-[0.3em] uppercase text-[#1a1a17]/50 mb-2">
-              /// CMS
+              {"/// CMS"}
             </div>
             <h1 className="text-3xl font-light leading-none tracking-tight">
               Alam<span className="italic font-normal text-[#5a6a3a]">Ops.</span>

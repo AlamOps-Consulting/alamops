@@ -59,9 +59,9 @@ export default function NewsletterConfirmPage() {
 
         {status === "success" && (
           <>
-            <h1 className="text-2xl font-semibold">You're subscribed!</h1>
+            <h1 className="text-2xl font-semibold">You’re subscribed!</h1>
             <p className="text-muted-foreground">
-              <strong>{email}</strong> is now confirmed. You'll start receiving
+              <strong>{email}</strong> is now confirmed. You’ll start receiving
               our newsletter.
             </p>
             <Button asChild variant="outline">

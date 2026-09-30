@@ -10,15 +10,22 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     ignores: [
       "node_modules/**",
       ".next/**",
+      "coverage/**",
       "out/**",
       "build/**",
       "next-env.d.ts",
     ],
+  },
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      // CMS and blob image sources are dynamic and cannot be safely allow-listed.
+      "@next/next/no-img-element": "off",
+    },
   },
 ];
 

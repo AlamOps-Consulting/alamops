@@ -57,13 +57,6 @@ export interface StatusPayload {
   generated_at: string;
 }
 
-interface CmsResponse<T> {
-  status?: string;
-  message?: string;
-  result?: T;
-  code?: number;
-}
-
 function unwrap<T>(payload: unknown): T | null {
   if (!payload || typeof payload !== "object") return null;
   const obj = payload as Record<string, unknown>;
