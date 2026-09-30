@@ -19,6 +19,14 @@ export const FALLBACK_RAW = [
 	},
 ];
 
+export type RawArticle = Partial<Omit<NewsItem, "_id" | "date">> & {
+	_id?: string | { $oid: string };
+	id?: string;
+	date?: string | number | Date | { $date: string };
+	image_url?: string;
+	imageUrl?: string;
+};
+
 /** Helpers */
 function stripHtml(html = "") {
 	// simple removal de etiquetas HTML
@@ -43,7 +51,7 @@ function buildExcerpt(content: string, max = 180) {
  * Normaliza entradas (acepta el raw mongo-export u objetos ya normales)
  * y devuelve NewsItem[] (lo que espera NewsGrid).
  */
-function resolveImage(a: any): string | undefined {
+function resolveImage(a: RawArticle): string | undefined {
 	const base = (API_URL ?? "").replace(/\/$/, "");
 
 	// 1) if caller gave us a fully-qualified URL, trust it
@@ -63,15 +71,20 @@ function resolveImage(a: any): string | undefined {
 	return undefined;
 }
 
-export function normalizeArticles(raw: any[]): NewsItem[] {
+export function normalizeArticles(raw: RawArticle[]): NewsItem[] {
 	return raw.map((a) => {
-		const rawDate = a?.date?.$date ?? a?.date ?? new Date().toISOString();
+		const rawDate =
+			typeof a.date === "object" && a.date !== null && "$date" in a.date
+				? a.date.$date
+				: a.date ?? new Date().toISOString();
 		const dateIso =
 			typeof rawDate === "string" ? rawDate : new Date(rawDate).toISOString();
 
 		const content = a.content ?? "";
 		const excerpt = a.excerpt ?? buildExcerpt(content, 200);
-		const _id = String(a._id?.$oid ?? a._id ?? a.id ?? a.slug ?? "");
+		const rawId =
+			typeof a._id === "object" && a._id !== null ? a._id.$oid : a._id;
+		const _id = String(rawId ?? a.id ?? a.slug ?? "");
 
 		const featured = Boolean(a.featured ?? false);
 		const image = resolveImage(a);

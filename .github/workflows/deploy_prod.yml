@@ -1,0 +1,19 @@
+name: alamops-web production CI/CD
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: alamops-web-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  secure-pipeline:
+    uses: ./.github/workflows/secure_pipeline.yml
+    with:
+      publish_image: true
+    secrets: inherit

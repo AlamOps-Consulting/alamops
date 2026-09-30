@@ -1,39 +1,44 @@
-# ---------- base ----------
-ARG NODE_VERSION=20-alpine
+# syntax=docker/dockerfile:1
 
-# ---------- deps ----------
+ARG NODE_VERSION=24-alpine
+
 FROM node:${NODE_VERSION} AS deps
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN apk add --no-cache libc6-compat
-COPY package*.json ./
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+RUN npm install --global pnpm@10.17.1
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# ---------- build ----------
 FROM node:${NODE_VERSION} AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_PUBLIC_API_URL="https://back.alamops.com"
+ARG NEXT_PUBLIC_API_URL=https://back.alamops.com
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 RUN apk add --no-cache libc6-compat
+RUN npm install --global pnpm@10.17.1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN npm run build
-RUN npm prune --omit=dev
+RUN pnpm build
 
-# ---------- run ----------
 FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
-RUN apk add --no-cache libc6-compat
+ENV HOSTNAME=0.0.0.0
 
-# Copiamos SOLO lo necesario para ejecutar
-COPY --from=builder /app/package*.json ./
-# ¡No copies next.config.ts aquí!
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 --ingroup nodejs nextjs
+
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["npm", "start"]
+USER nextjs
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget --quiet --spider http://127.0.0.1:3000/api/health || exit 1
+
+CMD ["node", "server.js"]

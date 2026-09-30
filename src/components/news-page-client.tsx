@@ -101,14 +101,15 @@ export default function NewsPageClient({ initialArticles }: { initialArticles: N
 			<div className="container mx-auto px-4 py-16">
 				{/* Category Filter */}
 				<div className="flex flex-wrap gap-2 justify-center mb-12">
-					{categories.map((category) => (
+					{categories.map((option) => (
 						<Button
-							key={category}
-							variant={category === "All" ? "default" : "outline"}
+							key={option}
+							variant={option === category ? "default" : "outline"}
 							size="sm"
 							className="rounded-full"
+							onClick={() => setCategory(option)}
 						>
-							{category}
+							{option}
 						</Button>
 					))}
 				</div>
@@ -259,8 +260,14 @@ export default function NewsPageClient({ initialArticles }: { initialArticles: N
 
 				{/* Load More Button */}
 				<div className="text-center mt-12">
-					<Button variant="outline" size="lg" className="group bg-transparent">
-						Load More Articles
+					<Button
+						variant="outline"
+						size="lg"
+						className="group bg-transparent"
+						onClick={loadMore}
+						disabled={loading}
+					>
+						{loading ? "Loading…" : "Load More Articles"}
 						<ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
 					</Button>
 				</div>

@@ -1,6 +1,10 @@
 import { API_URL } from "@/lib/utils";
 import type { NewsItem } from "@/types/news.type";
-import { FALLBACK_RAW, normalizeArticles } from "./data/news-fallback";
+import {
+  FALLBACK_RAW,
+  normalizeArticles,
+  type RawArticle,
+} from "./data/news-fallback";
 import { NewsGrid } from "./news-grid";
 
 export default async function NewsSection() {
@@ -15,7 +19,7 @@ export default async function NewsSection() {
     const items: unknown[] = Array.isArray(articles.items)
       ? articles.items
       : articles;
-    return <NewsGrid news={normalizeArticles(items as any[])} />;
+    return <NewsGrid news={normalizeArticles(items as RawArticle[])} />;
   } catch {
     return <NewsGrid news={normalizeArticles(FALLBACK_RAW)} />;
   }
